@@ -1,0 +1,4 @@
+Function log
+
+1. csv_reader_traffic.m -> main script to read the data extracted from DATEXII, raw data in traffic_data>export2
+2. csv_DATEX_reader.m -> function that takes as input the name of the file with the raw datas and output the structure with all the data
