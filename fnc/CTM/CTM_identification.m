@@ -26,17 +26,9 @@ N = numel(data);
 % sensors are placed at the interfaces of the cells, so
 N_cell = N-1;
 CTM_param.N = N_cell;
-
 % speed thrashold
-if length(opt.speed_th) == N_cell
-    speed_th = opt.speed_th;
-else
-    error('ERROR : wrong dimension of "data.speed_th" ') 
-end
+speed_th = [78 90  95 95 95 95 95];
 
-if length(opt.coeff_quantile) ~= N_cell
-    error('ERROR : wrong dimension of "data.coeff_quantile" ') 
-end
 
 %% Initialize the CT_param structure
 CTM_param.v_bar = zeros(N_cell,1);
@@ -106,7 +98,7 @@ for n = 1:N_cell
 
     % delete outliers
     flag = 0; i =1; ind_green_del =[];
-    ind_red_del = []; tol = 50000;
+    ind_red_del = []; tol = 500;
     while flag == 0
         if i <= length(flow_green)
             if flow_green(i)<0 || density_green(i)<0
@@ -136,7 +128,7 @@ for n = 1:N_cell
     CTM_param.v_bar(n) = f_green(1);
 
     % fit the congestion case
-    coeff_quantreg = opt.coeff_quantile;
+    coeff_quantreg = [0.95 0.95 0.8 0.90 0.9 0.9 0.9 ];
     [f_red,~]= quantreg(density_red',flow_red',coeff_quantreg(n),1);
     p_red = polyval(f_red,density_red);
      
@@ -158,6 +150,8 @@ for n = 1:N_cell
         supply_N_plus_computation;
         CTM_param.supply_N_plus = supply_N_plus;    
     end
+    
+
     
     %% Plots
     n_row = 2; 
@@ -203,3 +197,66 @@ catch ME
     rethrow(ME)
 end
 end
+
+%% Nice plot
+% Fundamental diagram sensor 1
+% 
+% f1 = figure;
+% scatter(density_green',flow_green',[],'g','filled')
+% hold on
+% grid on
+% scatter(density_red,flow_red,[],'r','filled')
+% plot([0,max(density)],...
+%         [CTM_param.q_max(1),CTM_param.q_max(1)],'c','LineWidth',3)
+% plot(density_green,p_green,'y','LineWidth',3)
+% plot(density_red,p_red,'b','LineWidth',3)
+% f1.WindowState = 'maximized';
+% ax = gca();
+% font_sz = 25;
+% ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
+% ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
+% ax.XAxis.Label.String = '$\rho_1$'; ax.XAxis.Label.FontSize = font_sz;
+% ax.XAxis.Label.Interpreter = 'latex';
+% ax.YAxis.Label.String = '$\phi_1$'; ax.YAxis.Label.FontSize = font_sz;
+% ax.YAxis.Label.Interpreter = 'latex';
+% exportgraphics(f1,['figure\fundamental_diagram_1.pdf'],...
+%                 'BackgroundColor','none');
+% exportgraphics(f1,['figure\fundamental_diagram_1.eps'],...
+%                 'BackgroundColor','none');
+% 
+%%
+% f2 = figure;
+% xx = 1:length(vel);scatter(xx,vel,[],color,'filled')
+% grid on
+% f2.WindowState = 'maximized';
+% ax = gca();
+% K = length(vel);
+% font_sz = 25;
+% 
+% ax.XTick = [1 round(1/CTM_param.T(1)*[1:23]) K];
+% asdasd = ax.XTick+1; asdasd(1) = asdasd(1)-1; asdasd(end) = asdasd(end)-1;
+% hr_lables = CS_status.time_hr(asdasd); 
+% hr_string = datestr(hr_lables,'HH:MM');
+% select only between '06:00' and '22:00'
+% hr_string = hr_string(4:end-1,:);
+% asdasd = asdasd(4:end-1);
+% instants = [8:2:20,21];
+% hr_string = hr_string(instants,:);
+% asdasd = asdasd(instants);
+% ax.XTick = asdasd;
+% hr_cell = cellstr(hr_string); ax.XTickLabel = hr_cell;
+% ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
+% ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
+% ax.XLim = [asdasd(1), asdasd(end)];
+% ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
+% ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
+% ax.XAxis.Label.String = 'time $[\textup h]$'; ax.XAxis.Label.FontSize = font_sz;
+% ax.XAxis.Label.Interpreter = 'latex';
+% ax.YAxis.Label.String = '$v_1\,[\textup{km/h}]$'; ax.YAxis.Label.FontSize = font_sz;
+% ax.YAxis.Label.Interpreter = 'latex';
+% exportgraphics(f2,['figure\velocity_1.pdf'],...
+%                 'BackgroundColor','none');
+% exportgraphics(f2,['figure\velocity_1.eps'],...
+%                 'BackgroundColor','none');
+%             
+%             

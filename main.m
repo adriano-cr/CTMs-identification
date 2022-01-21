@@ -7,8 +7,8 @@ addpath(p);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Author: Carlo Cenedese (ccenedese@ethz.ch)
 % Affiliation: ETH zurich - Automatic Control Laboratory
-% Code version: v0.1
-% Date: 18/02/2021
+% Code version: v2.0
+% Date: 21/01/2022
 % Based on the theory developed in "Highway Traffic Control via Smart 
 % e-Mobility" submitted to IEEE - TRANSACTION ON INTELLIGENT 
 % TRANSPORTATION SYSTEMS available at  
@@ -50,7 +50,7 @@ extra.sensor_id = {'162','158','154','150','147','142','137','132'};
 
 % extract the data from 'export4_light' and save the result in 
 % 'data_structure4' and store it in the structure data
-data = csv_DATEX_reader('export4_light','data_structure4',opt_DATEX,extra);
+data = csv_DATEX_reader_v2('export4_light','data_structure4_v2',opt_DATEX,extra);
 
 %% 2. CTM param identification
 % Identify the parameters of the CTM model

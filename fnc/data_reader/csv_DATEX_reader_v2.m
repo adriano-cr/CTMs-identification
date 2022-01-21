@@ -1,4 +1,4 @@
-function  out_structure = csv_DATEX_reader(input_str,output_str,opt,extra)
+function  out_structure = csv_DATEX_reader_v2(input_str,output_str,opt,extra)
 %% csv_DATEX_reader : 
 % The funciton that reads the raw traffic data file and then creates a
 % structure as output with all the data nicely organized and ready to be
@@ -23,7 +23,7 @@ function  out_structure = csv_DATEX_reader(input_str,output_str,opt,extra)
 
     path1 = '\traffic_data';
     addpath(genpath([pwd,path1]))
-
+    try
     %% Check number of onputs
     if nargin() < 4
         min_freq = [];
@@ -41,9 +41,9 @@ function  out_structure = csv_DATEX_reader(input_str,output_str,opt,extra)
     % load a previously extracted data structure and immediately send it as
     % an output of the function
     if opt.load 
-        file_to_load = ['fnc\data_reader\extracted_data\',...
-                        output_str,'.mat'];
-    file_to_load = [output_str,'.mat'];
+%         file_to_load = ['fnc\data_reader\extracted_data\',...
+%                         output_str,'.mat'];
+        file_to_load = [output_str,'.mat'];
         load(file_to_load,'sensor')
         % assign the output
         out_structure = sensor;
@@ -100,7 +100,7 @@ function  out_structure = csv_DATEX_reader(input_str,output_str,opt,extra)
         end
         % complete all the fields with every row
 
-        for k = 2:length(cell_raw)
+        for k = 2:length(cell_raw) %<----!!!!
             if mod(k,5000) == 0 && opt.verbatim
                 fprintf('   -Row %d/%d \n',k,length(cell_raw))
             end
@@ -198,7 +198,7 @@ function  out_structure = csv_DATEX_reader(input_str,output_str,opt,extra)
             time_ind = '';
             for jj = 1 : length(sensor(k).starting_s_time)
                 if strcmp(time_ind,sensor(k).ending_s_time(jj))
-                    % it means that ti is the same time 
+                    % it means that it is the same time 
                     % create the weighted avg speed
                     total_veh = sensor(k).vehicle_number(new_ind)+sensor(k).veh_number(jj);
                     v1 = sensor(k).vehicle_speed(new_ind) ;
@@ -246,7 +246,7 @@ function  out_structure = csv_DATEX_reader(input_str,output_str,opt,extra)
         end
         
         %% Interpolate the data
-
+       
         if ~isempty(min_freq) && sensor(1).sample_time(1) > 1/min_freq
             % if the minimum frequency is higher than the one of the
             % data we interpolate the data to attain the desired one    
@@ -255,20 +255,14 @@ function  out_structure = csv_DATEX_reader(input_str,output_str,opt,extra)
                 % every element in xx is made into "min_freq" many in yy
                 yy = 1:1/min_freq:length(sensor(k).vehicle_number);
                 number_v = sensor(k).vehicle_number;
-                interpolated_number_vv = interp1(xx,number_v,yy);
-                % [WRONG in v0.1:  We must divide by the frequency in order to obtain how
-                % many veh travel through the new interval of time
-                % interpolated_number_vv =
-                % floor(interpolated_number_vv./min_freq); ]
-                
+                interpolated_number_vv = interp1(xx,number_v,yy);                
                 % This is  the correct one because "interpolated_number_vv"
-                % is already in [veh/h]
-                interpolated_number_vv = floor(interpolated_number_vv./min_freq);
+                % is already in [veh/h] ( changed wrt v1.0 )
+                interpolated_number_vv = round(interpolated_number_vv);
                 % interpolate the velocity
                 speed_v = sensor(k).vehicle_speed;
                 interpolated_speed_vv = interp1(xx,speed_v,yy);
-                % assign the new values
-                sensor(k).vehicle_number = interpolated_number_vv;
+                % assign the new values 
                 sensor(k).vehicle_speed = interpolated_speed_vv;
                 % extend the other fields in "sensor"
                 sensor(k).starting_time = repelem(sensor(k).starting_time,1,min_freq);
@@ -282,19 +276,18 @@ function  out_structure = csv_DATEX_reader(input_str,output_str,opt,extra)
                 % sample time in [h], from the site we have the data in
                 % minutes hence we have to multiply 1/60 to achieve  
                 sensor(k).sample_time = sensor(k).sample_time(1)/min_freq*ones(1,length(yy))*(1/60);
+                % Since the interpolated_number_vv is the number wrt to
+                % hours, then we have to scale it wrt to the sample time.
+                sensor(k).vehicle_number = interpolated_number_vv.*sensor(k).sample_time;
             end
         end
 
         %% Compute the  fundamental diagram
         % we already have the flow, we just need the density
         for j = 1:length(sensors_id)
-            % [WRONG in v0.1: flow = vehicle_num*(sample_time/1h)
-            % flow = sensor(j).vehicle_number./sensor(j).sample_time;%.*60;
-            % % [veh/h]]
-            
-            % flow = vehicle_num -> it is already the flow cause it is the
-            % number every hour already.
-            flow = sensor(j).vehicle_number; % [veh/h]
+            % flow = vehicle_num / sample time 
+            % number every hour ( changed wrt v1.0 ) 
+            flow = sensor(j).vehicle_number./sensor(j).sample_time; % [veh/h]
             % density = flow*speed
             density = flow./sensor(j).vehicle_speed;
             sensor(j).flow = flow;
@@ -303,8 +296,8 @@ function  out_structure = csv_DATEX_reader(input_str,output_str,opt,extra)
         % assign the output
         out_structure = sensor;
         %% Save the file
-        save_file = ['fnc\data_reader\extracted_data\',...
-                        output_str,'.mat'];
+        save_file = ['extracted_data/',...
+                       output_str,'.mat'];
         save(save_file,'sensor')
         if opt.verbatim
             fprintf('6) Save the data in %s\n',save_file)
@@ -312,7 +305,7 @@ function  out_structure = csv_DATEX_reader(input_str,output_str,opt,extra)
         end
     end
     %% Plot 
-    try
+    
         if opt.display && length(sensor)>=4
             traffic_data_plot(sensor)
         end
