@@ -1,5 +1,6 @@
 clear all
 close all
+clc
 p = genpath('fnc');
 addpath(p);
 
@@ -37,7 +38,7 @@ opt_DATEX.display = 0;
 % load previously extracted data, i.e., 1 if wants load 
 % previously extracted data and 0 if you desire to
 % extract it from the raw data
-opt_DATEX.load = 1; 
+opt_DATEX.load = 0; 
 
 % minimum frequency per minute at which you want the 
 % data. Performs an interpolation if the data are 
@@ -50,7 +51,7 @@ extra.sensor_id = {'162','158','154','150','147','142','137','132'};
 
 % extract the data from 'export4_light' and save the result in 
 % 'data_structure4' and store it in the structure data
-data = csv_DATEX_reader_v2('export4_light','data_structure4_v2',opt_DATEX,extra);
+data = csv_DATEX_reader_v2('out','data_structure4_v2',opt_DATEX,extra);
 
 %% 2. CTM param identification
 % Identify the parameters of the CTM model
@@ -58,7 +59,7 @@ data = csv_DATEX_reader_v2('export4_light','data_structure4_v2',opt_DATEX,extra)
 
 % plot the figures realtive to the CTM identification, mainly the 
 % fundamental diagram 
-opt_identification.disp = 1;
+opt_identification.disp = 0;
 
 
 % threshold below which the vehicles are assumed to be into a congestion.

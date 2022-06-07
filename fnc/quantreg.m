@@ -90,8 +90,9 @@ pmean=x\y; %Start with an OLS regression
 %rho=@(r)sum(abs(r).*abs(tau-(r<0))); %better alternative from: Simeon Yurek from a comment on the matlab fileexchange. 
 rho=@(r)sum(abs(r.*(tau-(r<0))));
 
+%options = optimset('MaxFunEvals', 50000);
+%p=fminsearch(@(p)rho(y-x*p),pmean, options);
 p=fminsearch(@(p)rho(y-x*p),pmean);
-
 
 if nargout==0
     [xx,six]=sortrows(x(:,order));

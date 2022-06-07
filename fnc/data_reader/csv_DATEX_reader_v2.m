@@ -63,7 +63,8 @@ function  out_structure = csv_DATEX_reader_v2(input_str,output_str,opt,extra)
             disp('==============================')
         end
         % import in a cell
-        cell_raw = importdata(filename);
+        delimiter = '\n';
+        cell_raw = importdata(filename, delimiter);
         % create an empty structure
         data = struct();
 
@@ -88,7 +89,7 @@ function  out_structure = csv_DATEX_reader_v2(input_str,output_str,opt,extra)
             field_name = header(hd_comma(j)+1:hd_comma(j+1)-1);
             if ~isnan(str2double(field_name(1)))
                 % to avoid error due to first el a number
-                field_name = ['a', field_name];  
+                %field_name = ['a', field_name];  
             end
             data.(field_name) = []; 
             % setfield(data,field_name,[]);
@@ -296,8 +297,8 @@ function  out_structure = csv_DATEX_reader_v2(input_str,output_str,opt,extra)
         % assign the output
         out_structure = sensor;
         %% Save the file
-        save_file = ['extracted_data/',...
-                       output_str,'.mat'];
+        save_file = ['C:\A_Tesi\CTM-identification-master-CARLO\fnc\data_reader\extracted_data', output_str,'.mat'];
+        %save_file = ['C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTM-identification-master/fnc/data_reader/extracted_data/', output_str,'.mat'];
         save(save_file,'sensor')
         if opt.verbatim
             fprintf('6) Save the data in %s\n',save_file)
