@@ -24,17 +24,13 @@ function  out_structure = csv_DATEX_reader_v2(input_str,output_str,opt,extra)
     path1 = '\traffic_data';
     addpath(genpath([pwd,path1]))
     try
-    %% Check number of onputs
-    if nargin() < 4
-        min_freq = [];
-        sensors_id =  {'132','137','142','147'};
-    else
-        min_freq = extra.min_freq;
-        sensors_id = extra.sensor_id;
-        % check if the frequency id an integer or not
-        if ~mod(min_freq,1) == 0
-           error('ERROR : "min_freq" has to be an integer') 
-        end
+    %% Check number of inputs
+
+    min_freq = extra.min_freq;
+    sensors_id = extra.sensor_id;
+    % check if the frequency id an integer or not
+    if ~mod(min_freq,1) == 0
+       error('ERROR : "min_freq" has to be an integer') 
     end
     
     %% Check if the user wants to load other data
@@ -132,8 +128,6 @@ function  out_structure = csv_DATEX_reader_v2(input_str,output_str,opt,extra)
         % extract from the whole data only the ones that interest us
         % find different inde associated to the different sensors
 
-        % sensors_id = {'132','137','142','147'};
-
         % find in the data the ones associated to a particular sensor
         for j = 1:length(sensors_id)
             sensor_name = char(sensors_id(j));
@@ -191,7 +185,7 @@ function  out_structure = csv_DATEX_reader_v2(input_str,output_str,opt,extra)
             
             % create some temporary structure  fields
             sensor(k).ending_time = sensor(k).ending_s_time;
-            sensor(k).starting_time = sensor(k).ending_s_time;
+            sensor(k).starting_time = sensor(k).ending_s_time; 
             sensor(k).vehicle_number = sensor(k).veh_number;
             sensor(k).vehicle_speed = sensor(k).veh_avg_speed; 
             sensor(k).sample_time = sensor(k).time_sample;
@@ -297,7 +291,7 @@ function  out_structure = csv_DATEX_reader_v2(input_str,output_str,opt,extra)
         % assign the output
         out_structure = sensor;
         %% Save the file
-        save_file = ['C:\A_Tesi\CTM-identification-master-CARLO\fnc\data_reader\extracted_data', output_str,'.mat'];
+        save_file = ['C:\A_Tesi\CTM-identification\fnc\data_reader\extracted_data', output_str,'.mat'];
         %save_file = ['C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTM-identification-master/fnc/data_reader/extracted_data/', output_str,'.mat'];
         save(save_file,'sensor')
         if opt.verbatim

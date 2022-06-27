@@ -3,7 +3,6 @@ close all
 clc
 p = genpath('fnc');
 addpath(p);
-sensori = 0; %1=file sette sensori
 
 %% Identification of CTM
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -48,16 +47,12 @@ extra.min_freq = 6;
 
 % the number assoiciated to the sensor by DATEX, these has to be found 
 % directly in the raw data or in the data site 
-if (sensori == 1)
-    extra.sensor_id = {'162','158','154','150','147','142','137','132'};
-else
-    extra.sensor_id = {'099','103','107','111','115','119','123','127','132','137','143'};
-end
-
+%extra.sensor_id = {'099','103','107','111','115','119','123','127','132','137','143'};
+extra.sensor_id = {'162','1','107','111','115','119','123','127','132','137','143'};
 
 % extract the data from 'export4_light' and save the result in 
 % 'data_structure4' and store it in the structure data
-data = csv_DATEX_reader_v2('export4_light_complete_15min','data_structure4_v2',opt_DATEX,extra);
+data = csv_DATEX_reader_v2('export4_light_15min','data_structure4_v2',opt_DATEX,extra);
 
 %% 2. CTM param identification
 % Identify the parameters of the CTM model
@@ -71,20 +66,14 @@ opt_identification.disp = 0;
 % threshold below which the vehicles are assumed to be into a congestion.
 % This was tuned for the problem at hand by looking at the plots attained
 % in 'cvs_DATEX_reader' regarding the velocity.
-if (sensori == 1)
-    opt_identification.speed_th = [78 90 95 95 95 95 95];
-else
-    opt_identification.speed_th = [78 90 95 95 95 95 95 95 95 95];
-end
-
+opt_identification.speed_th = [78 90 95 95 95 95 95 95 95 95 95];
+opt_identification.speed_th = [78 90 95 95 95 95 95 95 95 95 95];
 % The threshold used in the quantile regression, these are tuned for the
 % particular date used in this example. The vector has to be as long as the
 % number of cells in teh CTM model.
-if (sensori == 1)
-    opt_identification.coeff_quantile = [0.95 0.95 0.8 0.90 0.9 0.9 0.9];
-else   
-    opt_identification.coeff_quantile = [0.95 0.95 0.8 0.90 0.9 0.9 0.9 0.9 0.9 0.9];
-end
+
+%opt_identification.coeff_quantile = [0.95 0.95 0.8 0.90 0.9 0.9 0.9 0.9 0.9 0.9 0.9];
+opt_identification.coeff_quantile = [0.95 0.95 0.8 0.90 0.9 0.9 0.9];
 
 [CTM_param,phi_1] = CTM_identification(data,opt_identification);
 
