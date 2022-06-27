@@ -57,7 +57,7 @@ end
 
 % extract the data from 'export4_light' and save the result in 
 % 'data_structure4' and store it in the structure data
-data = csv_DATEX_reader_v2('export4_light_complete_15min','data_structure4_v2',opt_DATEX,extra);
+data = csv_DATEX_reader_v3('export4_light_complete_15min','data_structure4_v2',opt_DATEX,extra);
 
 %% 2. CTM param identification
 % Identify the parameters of the CTM model
