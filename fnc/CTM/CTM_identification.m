@@ -98,7 +98,7 @@ for n = 1:N_cell
 
     % delete outliers
     flag = 0; i =1; ind_green_del =[];
-    ind_red_del = []; tol = 125; %tol = 500;
+    ind_red_del = []; tol = 125;
     while flag == 0
         if i <= length(flow_green)
             if flow_green(i)<0 || density_green(i)<0
