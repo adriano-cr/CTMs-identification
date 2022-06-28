@@ -132,10 +132,28 @@ try
             
             % check corrupted data, hence zeros that should not be there
             % and due to sensor failure
-            for k = 2 : length(sensor(j).veh_number)-1
-                if(sensor(j).veh_number(k) == 0 && sensor(j).veh_avg_speed(k) <= 0)
-                    sensor(j).veh_number(k) = round((sensor(j).veh_number(k-1)+sensor(j).veh_number(k+1))/2);
-                    sensor(j).veh_avg_speed(k) = (sensor(j).veh_avg_speed(k-1)+sensor(j).veh_avg_speed(k+1))/2;
+            for k = 1 : length(sensor(j).veh_number)
+                if(sensor(j).veh_number(k) == 0 )
+                    if (k==1)
+                        prev_num = 0;
+                        prev_speed = 0;
+                    else
+                        prev_num = sensor(j).veh_number(k-1);
+                        prev_speed = sensor(j).veh_avg_speed(k-1);
+                    end
+                    if (k==length(sensor(j).veh_number))
+                        next_veh = 0;
+                        next_speed = 0;
+                    else
+                        next_veh = sensor(j).veh_number(k+1);
+                        next_speed = sensor(j).veh_avg_speed(k+1);
+                    end
+                    sensor(j).veh_number(k) = round((prev_num+next_veh)/2);
+                    sensor(j).veh_avg_speed(k) = (prev_speed+next_speed)/2;
+                    if(sensor(j).veh_avg_speed(k) < 0) 
+                        sensor(j).veh_avg_speed(k) = 0;
+                    end
+
                 end
             end
         end
@@ -146,62 +164,63 @@ try
             fprintf('5) Reshaping the data \n')
         end
 
+        % create some temporary structure  fields
+        sensor1 = sensor;
+        [sensor1.('ending_time')] = sensor1.('ending_s_time');
+        sensor1 = rmfield(sensor1,'ending_s_time');
+        [sensor1.('starting_time')] = sensor1.('starting_s_time');
+        sensor1 = rmfield(sensor1,'starting_s_time');
+        [sensor1.('vehicle_number')] = sensor1.('veh_number');
+        sensor1 = rmfield(sensor1,'veh_number');
+        [sensor1.('vehicle_speed')] = sensor1.('veh_avg_speed');
+        sensor1 = rmfield(sensor1,'veh_avg_speed');
+        [sensor1.('position')] = sensor1.('location');
+        sensor1 = rmfield(sensor1,'location');
+        [sensor1.('sample_time')] = sensor1.('time_sample');
+        sensor1 = rmfield(sensor1,'time_sample'); 
+        
+        % dovrebbe raggruppare le 3 corsie a parità di timestamp
         new_ind = 1;
         for k = 1:length(sensors_id)
-            
-
-            % create some temporary structure  fields
-            sensor(k).ending_time = sensor(k).ending_s_time;
-            sensor(k).starting_time = sensor(k).starting_s_time;
-            sensor(k).vehicle_number = sensor(k).veh_number;
-            sensor(k).vehicle_speed = sensor(k).veh_avg_speed;
-            sensor(k).sample_time = sensor(k).time_sample;
-            sensor(k).position = sensor(k).location;
             time_ind = '';
             for jj = 1 : length(sensor(k).starting_s_time)
                 if strcmp(time_ind,sensor(k).ending_s_time(jj))
                     % it means that it is the same time
                     % create the weighted avg speed
-                    total_veh = sensor(k).vehicle_number(new_ind)+sensor(k).veh_number(jj);
-                    v1 = sensor(k).vehicle_speed(new_ind) ;
+                    total_veh = sensor1(k).vehicle_number(new_ind)+sensor(k).veh_number(jj);
+                    v1 = sensor1(k).vehicle_speed(new_ind);
                     v2 = sensor(k).veh_avg_speed(jj);
                     % add the number of vehicles
-                    sensor(k).vehicle_number(new_ind) = total_veh;
-                    sensor(k).vehicle_speed(new_ind) = v1*sensor(k).vehicle_number(new_ind)/total_veh ...
+                    sensor1(k).vehicle_number(new_ind) = total_veh;
+                    sensor1(k).vehicle_speed(new_ind) = v1*sensor1(k).vehicle_number(new_ind)/total_veh ...
                         +v2*sensor(k).veh_number(jj)/total_veh;
                 else
                     % there sample period that starts
                     % save the starting and ending time
-                    sensor(k).ending_time(new_ind) = sensor(k).ending_s_time(jj);
-                    sensor(k).starting_time(new_ind) = sensor(k).starting_s_time(jj);
-                    sensor(k).vehicle_number(new_ind) = sensor(k).veh_number(jj);
-                    sensor(k).vehicle_speed(new_ind) = sensor(k).veh_avg_speed(jj);
-                    sensor(k).sample_time(new_ind) = sensor(k).time_sample(jj);
-                    sensor(k).position(new_ind) = sensor(k).location(jj);
+                    sensor1(k).ending_time(new_ind) = sensor(k).ending_s_time(jj);
+                    sensor1(k).starting_time(new_ind) = sensor(k).starting_s_time(jj);
+                    sensor1(k).vehicle_number(new_ind) = sensor(k).veh_number(jj);
+                    sensor1(k).vehicle_speed(new_ind) = sensor(k).veh_avg_speed(jj);
+                    sensor1(k).sample_time(new_ind) = sensor(k).time_sample(jj);
+                    sensor1(k).position(new_ind) = sensor(k).location(jj);
                     new_ind = new_ind+1;
                 end
                 time_ind = sensor(k).ending_s_time(jj);
             end
-            sensor(k).ending_time(new_ind:end) = [];
-            sensor(k).starting_time(new_ind:end) = [];
-            sensor(k).vehicle_number(new_ind:end) = [];
-            sensor(k).vehicle_speed(new_ind:end) = [];
-            sensor(k).sample_time(new_ind:end) = [];
-            sensor(k).position(new_ind:end) = [];
+            sensor1(k).ending_time(new_ind:end) = [];
+            sensor1(k).starting_time(new_ind:end) = [];
+            sensor1(k).vehicle_number(new_ind:end) = [];
+            sensor1(k).vehicle_speed(new_ind:end) = [];
+            sensor1(k).sample_time(new_ind:end) = [];
+            sensor1(k).position(new_ind:end) = [];
             new_ind = 1;
             % make all column vectors
-            sensor(k).ending_time = sensor(k).ending_time';
-            sensor(k).starting_time = sensor(k).starting_time';
-            sensor(k).position = sensor(k).position';
-
+            sensor1(k).ending_time = sensor1(k).ending_time';
+            sensor1(k).starting_time = sensor1(k).starting_time';
+            sensor1(k).position = sensor1(k).position';
         end
-        % remove the fields not used naymore
-        sensor = rmfield(sensor,'ending_s_time');
-        sensor = rmfield(sensor,'starting_s_time');
-        sensor = rmfield(sensor,'time_sample');
-        sensor = rmfield(sensor,'veh_number');
-        sensor = rmfield(sensor,'veh_avg_speed');
-        sensor = rmfield(sensor,'location');
+
+        sensor = sensor1;
         if opt.verbatim
             disp('==============================')
         end
@@ -248,8 +267,7 @@ try
         for j = 1:length(sensors_id)
             % flow = vehicle_num / sample time
             % number every hour ( changed wrt v1.0 )
-            flow = sensor(j).vehicle_number./sensor(j).sample_time; % [veh/h]
-            % density = flow*speed
+            flow = sensor(j).vehicle_number./sensor(j).sample_time; % [veh/h] 
             density = flow./sensor(j).vehicle_speed;
             sensor(j).flow = flow;
             sensor(j).density = density;
@@ -309,9 +327,3 @@ for n = 1 : N
     title(title_str3)
 end
 end
-
-
-
-
-
-
