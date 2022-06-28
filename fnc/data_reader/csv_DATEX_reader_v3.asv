@@ -293,7 +293,7 @@ end
 function traffic_data_plot(sensor)
 %% Plot some data
     last_fig_num = get(gcf,'Number');
-    n_row = 3; N = size(sensor,2);
+    n_row = 2; N = size(sensor,2);
     for n = 1 : N
         % % % % % % % %
         figure(last_fig_num+1)
@@ -315,7 +315,7 @@ function traffic_data_plot(sensor)
         
         % % % % % % % %
         figure(last_fig_num+3)
-        subplot(n_row,ceil((N)/n_row),n)
+        subplot(n_row,ceil((N-1)/n_row),n)
         scatter(sensor(n).density,sensor(n).flow)
         grid on
         title_str3 = ['Fundamental diagram (Sens. ',num2str(n),')'];
