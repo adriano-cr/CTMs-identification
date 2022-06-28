@@ -48,7 +48,7 @@ extra.min_freq = 6;
 
 % extract the data from 'export4_light' and save the result in 
 % 'data_structure4' and store it in the structure data
-data = csv_DATEX_reader_v3('export4_light_complete','data_structure4_v2',opt_DATEX,extra);
+data = csv_DATEX_reader_v3('intensiteit-snelheid-export','data_structure4_v2',opt_DATEX,extra);
 
 %% 2. CTM param identification
 % Identify the parameters of the CTM model
@@ -65,7 +65,7 @@ opt_identification.disp = 0;
 if (sensori == 1)
     opt_identification.speed_th = [78 90 95 95 95 95 95];
 else
-    opt_identification.speed_th = [78 90 95 95 95 95 95 95 95 95];
+    opt_identification.speed_th = [78 90 95 95 95 95 95 95 95 95 95 95];
 end
 
 % The threshold used in the quantile regression, these are tuned for the
@@ -74,7 +74,7 @@ end
 if (sensori == 1)
     opt_identification.coeff_quantile = [0.95 0.95 0.8 0.90 0.9 0.9 0.9];
 else   
-    opt_identification.coeff_quantile = [0.95 0.95 0.8 0.90 0.9 0.9 0.9 0.9 0.9 0.9];
+    opt_identification.coeff_quantile = [0.95 0.95 0.8 0.90 0.9 0.9 0.9 0.9 0.9 0.9 0.9 0.9];
 end
 
 [CTM_param,phi_1] = CTM_identification(data,opt_identification);
