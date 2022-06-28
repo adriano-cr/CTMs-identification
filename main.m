@@ -56,7 +56,7 @@ data = csv_DATEX_reader_v3('export4_light_complete','data_structure4_v2',opt_DAT
 
 % plot the figures realtive to the CTM identification, mainly the 
 % fundamental diagram 
-opt_identification.disp = 0;
+opt_identification.disp = 1;
 
 
 % threshold below which the vehicles are assumed to be into a congestion.

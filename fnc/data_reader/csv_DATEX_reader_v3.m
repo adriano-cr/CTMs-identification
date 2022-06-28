@@ -102,7 +102,8 @@ function  out_structure = csv_DATEX_reader_v3(input_str,output_str,opt,extra)
         for i = 1:length(sensors_raw)
             sensors_id(i) = erase(extractAfter(string(sensors_raw(i)), 8), 'ra');
         end
-        sensors_id = fliplr(sensors_id);
+        %sensors_id = fliplr(sensors_id);
+        
         %% Extract useful data
         % extract from the whole data only the ones that interest us
         % find different inde associated to the different sensors
