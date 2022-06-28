@@ -34,7 +34,7 @@ sensori = 0; %1=file sette sensori
 opt_DATEX.verbatim = 1; 
 
 % plot the data obtained graphs
-opt_DATEX.display = 0; 
+opt_DATEX.display = 1; 
 
 % load previously extracted data, i.e., 1 if wants load 
 % previously extracted data and 0 if you desire to
@@ -46,18 +46,9 @@ opt_DATEX.load = 0;
 % sampled at a lower rate 
 extra.min_freq = 6; 
 
-% the number assoiciated to the sensor by DATEX, these has to be found 
-% directly in the raw data or in the data site 
-if (sensori == 1)
-    extra.sensor_id = {'162','158','154','150','147','142','137','132'};
-else
-    extra.sensor_id = {'099','103','107','111','115','119','123','127','132','137','143'};
-end
-
-
 % extract the data from 'export4_light' and save the result in 
 % 'data_structure4' and store it in the structure data
-data = csv_DATEX_reader_v3('export4_light_complete_15min','data_structure4_v2',opt_DATEX,extra);
+data = csv_DATEX_reader_v3('export4_light_complete','data_structure4_v2',opt_DATEX,extra);
 
 %% 2. CTM param identification
 % Identify the parameters of the CTM model

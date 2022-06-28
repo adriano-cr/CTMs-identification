@@ -27,7 +27,6 @@ function  out_structure = csv_DATEX_reader_v3(input_str,output_str,opt,extra)
     %% Check number of inputs
 
     min_freq = extra.min_freq;
-    sensors_id = extra.sensor_id;
     % check if the frequency id an integer or not
     if ~mod(min_freq,1) == 0
        error('ERROR : "min_freq" has to be an integer') 
@@ -61,7 +60,7 @@ function  out_structure = csv_DATEX_reader_v3(input_str,output_str,opt,extra)
         % import in a cell
         import_raw = importdata(filename);
         cell_raw = import_raw.textdata;
-        cell_raw(2:end,7) = num2cell(import_raw.data(:,1));
+        cell_raw(2:end,7) = num2cell(import_raw.data(:,1)); % fare dinamico
         % create an empty structure
         data = struct();
 
@@ -91,14 +90,19 @@ function  out_structure = csv_DATEX_reader_v3(input_str,output_str,opt,extra)
         for i = 1:numel(data_field_name)
             % get the data field
             field_i_name = char(data_field_name(i)); 
-            tmp = data.(field_i_name);
             % select the data in the row
-            data.(field_i_name) = [tmp,cell_raw(2:end, i)];
+            data.(field_i_name) = [cell_raw(2:end, i)];
         end
-        
         if opt.verbatim
             fprintf('3) Created struct : %s \n','data') 
         end
+        sensors_raw = unique(data.naam_meetlocatie_mst);
+        
+        %% Find sensor names
+        for i = 1:length(sensors_raw)
+            sensors_id(i) = erase(extractAfter(string(sensors_raw(i)), 8), 'ra');
+        end
+        sensors_id = fliplr(sensors_id);
         %% Extract useful data
         % extract from the whole data only the ones that interest us
         % find different inde associated to the different sensors
@@ -266,8 +270,8 @@ function  out_structure = csv_DATEX_reader_v3(input_str,output_str,opt,extra)
         % assign the output
         out_structure = sensor;
         %% Save the file
-        save_file = ['C:\A_Tesi\CTM-identification\fnc\data_reader\extracted_data', output_str,'.mat'];
-        %save_file = ['C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTM-identification-master/fnc/data_reader/extracted_data/', output_str,'.mat'];
+        %save_file = ['C:\A_Tesi\CTM-identification\fnc\data_reader\extracted_data', output_str,'.mat'];
+        save_file = ['C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTM-identification/fnc/data_reader/extracted_data/', output_str,'.mat'];
         save(save_file,'sensor')
         if opt.verbatim
             fprintf('6) Save the data in %s\n',save_file)
@@ -288,7 +292,7 @@ end
 function traffic_data_plot(sensor)
 %% Plot some data
     last_fig_num = get(gcf,'Number');
-    n_row = 2; N = size(sensor,2);
+    n_row = 3; N = size(sensor,2);
     for n = 1 : N
         % % % % % % % %
         figure(last_fig_num+1)

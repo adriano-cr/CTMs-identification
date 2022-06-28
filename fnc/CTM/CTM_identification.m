@@ -26,8 +26,8 @@ N = numel(data);
 % sensors are placed at the interfaces of the cells, so
 N_cell = N-1;
 CTM_param.N = N_cell;
-% speed thrashold
-speed_th = [78 90  95 95 95 95 95];
+% speed threshold
+speed_th = opt.speed_th;
 
 
 %% Initialize the CT_param structure
@@ -71,9 +71,9 @@ for n = 1:N_cell
 
     %% Cell length & time
     % position sensor n
-    position_s1 = str2num(cell2mat(data(n).position(1)));
+    position_s1 = cell2mat(data(n).position(1));
     % position sensor n
-    position_s2 = str2num(cell2mat(data(n+1).position(1)));
+    position_s2 = cell2mat(data(n+1).position(1));
     CTM_param.len(n) = 10^(-3)*(abs(position_s2-position_s1)); % [km]
     CTM_param.T(n) = data(1).sample_time(1); % [h]
     
@@ -128,7 +128,7 @@ for n = 1:N_cell
     CTM_param.v_bar(n) = f_green(1);
 
     % fit the congestion case
-    coeff_quantreg = [0.95 0.95 0.8 0.90 0.9 0.9 0.9 ];
+    coeff_quantreg = opt.coeff_quantile;
     [f_red,~]= quantreg(density_red',flow_red',coeff_quantreg(n),1);
     p_red = polyval(f_red,density_red);
      
