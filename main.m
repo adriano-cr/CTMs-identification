@@ -65,7 +65,7 @@ opt_identification.disp = 1;
 if (sensori == 1)
     opt_identification.speed_th = [78 98 99 95 95 95 95];
 else
-    opt_identification.speed_th = [80 60 60 60 60 60 60 60 60 60 60 60];
+    opt_identification.speed_th = [65 65 80 80 80 68 80 65 65 75 65 65];
 end
 
 % The threshold used in the quantile regression, these are tuned for the
@@ -74,7 +74,7 @@ end
 if (sensori == 1)
     opt_identification.coeff_quantile = [0.95 0.95 0.8 0.90 0.9 0.9 0.9];
 else   
-    opt_identification.coeff_quantile = [0.85 0.9 0.9 0.9 0.9 0.85 0.9 0.9 0.9 0.9 0.9 0.9];
+    opt_identification.coeff_quantile = [0.80 0.80 0.91 0.91 0.91 0.91 0.91 0.91 0.91 0.91 0.91 0.91];
 end
 
 [CTM_param,phi_1] = CTM_identification(data,opt_identification);
