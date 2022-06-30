@@ -1,4 +1,4 @@
-function  out_structure = csv_DATEX_reader_v3(input_str,output_str,opt,extra)
+function  out_structure = csv_DATEX_reader_v4(input_str,output_str,opt,extra)
 %% csv_DATEX_reader :
 % The funciton that reads the raw traffic data file and then creates a
 % structure as output with all the data nicely organized and ready to be
@@ -129,20 +129,20 @@ try
             sensor(j).ending_s_time = data.eind_meetperiode(sensor_index);
             sensor(j).starting_s_time = data.start_meetperiode(sensor_index);
             sensor(j).location = data.afstand_tot_vild_locatie(sensor_index);
-            
+
             % check corrupted data, hence zeros that should not be there
             % and due to sensor failure
             for k = 1 : length(sensor(j).veh_number)
-                if(sensor(j).veh_speed(k) < 0 )
-%                     if (k==length(sensor(j).veh_number))
-%                         next_veh = 0;
-%                         next_speed = 0;
-%                     else
-%                         next_veh = sensor(j).veh_number(k+1);
-%                         next_speed = sensor(j).veh_avg_speed(k+1);
-%                     end
+                if(sensor(j).veh_avg_speed(k) < 0 )
+                    %                     if (k==length(sensor(j).veh_number))
+                    %                         next_veh = 0;
+                    %                         next_speed = 0;
+                    %                     else
+                    %                         next_veh = sensor(j).veh_number(k+1);
+                    %                         next_speed = sensor(j).veh_avg_speed(k+1);
+                    %                     end
                     sensor(j).veh_avg_speed(k) = 0;
-                 end
+                end
             end
         end
 
@@ -154,21 +154,25 @@ try
 
         % create a temporary structure
         sensor_sum(length(sensors_id)) = struct(); %preallocate space for speed-up
-        
+
         for i = 1:length(sensors_id)
             k = 1;
             for j = 1:3:length(sensor(i).veh_avg_speed)
                 veh1 = sensor(i).veh_number(j);
                 veh2 = sensor(i).veh_number(j+1);
                 veh3 = sensor(i).veh_number(j+2);
-                
+
                 total_veh = veh1 + veh2 + veh3;
-                
+
                 vel1 = sensor(i).veh_avg_speed(j);
                 vel2 = sensor(i).veh_avg_speed(j+1);
                 vel3 = sensor(i).veh_avg_speed(j+2);
-
-                w_avg_speed = (vel1 * veh1 + vel2 * veh2 + vel3 * veh3)/total_veh;
+                
+                if total_veh == 0
+                    w_avg_speed = 0;
+                else
+                    w_avg_speed = (vel1 * veh1 + vel2 * veh2 + vel3 * veh3)/total_veh;
+                end
                 
                 sensor_sum(i).vehicle_number(k) = total_veh;
                 sensor_sum(i).vehicle_speed(k) = w_avg_speed;
@@ -188,14 +192,15 @@ try
         end
 
         %% Interpolate the data
-
+        % if the minimum frequency is higher than the one of the
+        % data we interpolate the data to attain the desired one
         if ~isempty(min_freq) && sensor(1).sample_time(1) > 1/min_freq
-            % if the minimum frequency is higher than the one of the
-            % data we interpolate the data to attain the desired one
+         
             for k = 1: length(sensors_id)
                 xx = 1:length(sensor(k).vehicle_number);
                 % every element in xx is made into "min_freq" many in yy
-                yy = 1:1/min_freq:length(sensor(k).vehicle_number);
+                %yy = 1:1/min_freq:length(sensor(k).vehicle_number);
+                yy = linspace(1,length(sensor(k).vehicle_number),length(sensor(k).vehicle_number)*min_freq) 
                 number_v = sensor(k).vehicle_number;
                 interpolated_number_vv = interp1(xx,number_v,yy);
                 % This is  the correct one because "interpolated_number_vv"
@@ -229,7 +234,7 @@ try
         for j = 1:length(sensors_id)
             % flow = vehicle_num / sample time
             % number every hour ( changed wrt v1.0 )
-            flow = sensor(j).vehicle_number./sensor(j).sample_time; % [veh/h] 
+            flow = sensor(j).vehicle_number./sensor(j).sample_time; % [veh/h]
             density = flow./sensor(j).vehicle_speed;
             for i = 1:length(density)
                 if density(i) < 0
@@ -242,8 +247,8 @@ try
         % assign the output
         out_structure = sensor;
         %% Save the file
-        %save_file = ['C:\A_Tesi\CTM-identification\fnc\data_reader\extracted_data', output_str,'.mat'];
-        save_file = ['C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTM-identification/fnc/data_reader/extracted_data/', output_str,'.mat'];
+        save_file = ['C:\A_Tesi\CTM-identification\fnc\data_reader\extracted_data', output_str,'.mat'];
+        %save_file = ['C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTM-identification/fnc/data_reader/extracted_data/', output_str,'.mat'];
         %save_file = ['H:\Il mio Drive\Tesi magistrale\CTM-identification\fnc\data_reader\extracted_data', output_str,'.mat'];
         save(save_file,'sensor')
         if opt.verbatim

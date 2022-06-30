@@ -192,14 +192,15 @@ try
         end
 
         %% Interpolate the data
-
+        % if the minimum frequency is higher than the one of the
+        % data we interpolate the data to attain the desired one
         if ~isempty(min_freq) && sensor(1).sample_time(1) > 1/min_freq
-            % if the minimum frequency is higher than the one of the
-            % data we interpolate the data to attain the desired one
+         
             for k = 1: length(sensors_id)
-                xx = 1:length(sensor(k).vehicle_number);
+                xx = linspace(1, length(sensor(k).vehicle_number), length(sensor(k).vehicle_number));
+                
                 % every element in xx is made into "min_freq" many in yy
-                yy = 1:1/min_freq:length(sensor(k).vehicle_number);
+                yy = linspace(1,length(sensor(k).vehicle_number),length(sensor(k).vehicle_number)*min_freq);
                 number_v = sensor(k).vehicle_number;
                 interpolated_number_vv = interp1(xx,number_v,yy);
                 % This is  the correct one because "interpolated_number_vv"
@@ -214,10 +215,6 @@ try
                 sensor(k).starting_time = repelem(sensor(k).starting_time,1,min_freq);
                 sensor(k).ending_time = repelem(sensor(k).ending_time,1,min_freq);
                 sensor(k).position = repelem(sensor(k).position,1,min_freq);
-                % delete extra elements
-                sensor(k).starting_time(end-2:end) = [];
-                sensor(k).ending_time(end-2:end) = [];
-                sensor(k).position(end-2:end) = [];
 
                 % sample time in [h], from the site we have the data in
                 % minutes hence we have to multiply 1/60 to achieve
@@ -246,8 +243,8 @@ try
         % assign the output
         out_structure = sensor;
         %% Save the file
-        %save_file = ['C:\A_Tesi\CTM-identification\fnc\data_reader\extracted_data', output_str,'.mat'];
-        save_file = ['C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTM-identification/fnc/data_reader/extracted_data/', output_str,'.mat'];
+        save_file = ['C:\A_Tesi\CTM-identification\fnc\data_reader\extracted_data', output_str,'.mat'];
+        %save_file = ['C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTM-identification/fnc/data_reader/extracted_data/', output_str,'.mat'];
         %save_file = ['H:\Il mio Drive\Tesi magistrale\CTM-identification\fnc\data_reader\extracted_data', output_str,'.mat'];
         save(save_file,'sensor')
         if opt.verbatim
@@ -275,7 +272,7 @@ for n = 1 : N
     figure(last_fig_num+1)
     subplot(n_row,ceil((N)/n_row),n)
     bar(sensor(n).vehicle_number)
-    title_str1 = ['# vehicles (Sens. ',num2str(n),')'];
+    title_str1 = ['# vehicles (10s) (Sens. ',num2str(n),')'];
     title(title_str1)
     grid on
 
