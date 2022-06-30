@@ -218,25 +218,24 @@ try
 
                 % sample time in [h], from the site we have the data in
                 % minutes hence we have to multiply 1/60 to achieve
-                sensor(k).sample_time = sensor(k).sample_time(1)/min_freq*ones(1,length(yy))*(1/60);
+                sample_interpolazione=sensor(k).sample_time(1)/min_freq;
+                sensor(k).sample_time = sample_interpolazione/60*ones(1,length(yy));
                 % Since the interpolated_number_vv is the number wrt to
                 % hours, then we have to scale it wrt to the sample time.
-                sensor(k).vehicle_number = interpolated_number_vv.*sensor(k).sample_time;
+                sensor(k).vehicle_number = interpolated_number_vv;
+                %sensor(k).vehicle_number = interpolated_number_vv./60;
+                %sensor(k).vehicle_number = interpolated_number_vv.*sensor(k).sample_time;
             end
         end
 
         %% Compute the  fundamental diagram
         % we already have the flow, we just need the density
         for j = 1:length(sensors_id)
-            % flow = vehicle_num / sample time
-            % number every hour ( changed wrt v1.0 )
-            flow = sensor(j).vehicle_number./sensor(j).sample_time; % [veh/h]
+            %flow = sensor(j).vehicle_number./sensor(j).sample_time; % [veh/h]
+            %flow = sensor(j).vehicle_number.*60;
+            flow=sensor(j).vehicle_number;
             density = flow./sensor(j).vehicle_speed;
-            for i = 1:length(density)
-                if density(i) < 0
-                    density(i) = 0;
-                end
-            end
+       
             sensor(j).flow = flow;
             sensor(j).density = density;
         end

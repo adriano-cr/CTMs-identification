@@ -199,7 +199,7 @@ if sum(CTM_param.T'.*CTM_param.v_bar./CTM_param.len>1)>0
 end
 
 catch ME
-    %keyboard
+    keyboard
     rethrow(ME)
 end
 end

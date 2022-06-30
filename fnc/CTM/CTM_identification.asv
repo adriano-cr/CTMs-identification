@@ -98,7 +98,7 @@ for n = 1:N_cell
 
     % delete outliers
     flag = 0; i =1; ind_green_del =[];
-    ind_red_del = []; tol = 25;
+    ind_red_del = []; tol = 500;
     while flag == 0
         if i <= length(flow_green)
             if flow_green(i)<0 || density_green(i)<0
@@ -161,6 +161,8 @@ for n = 1:N_cell
             subplot(n_row,ceil((N-1)/n_row),n)
             xx = 1:length(vel);
             scatter(xx,vel,[],color,'filled')
+            title_str3 = ['Velocity (Cell ',num2str(n),')'];
+            title(title_str3)
             grid on
             ff = figure(last_fig_num+2);
             subplot(n_row,ceil((N-1)/n_row),n)
@@ -174,10 +176,14 @@ for n = 1:N_cell
                     [CTM_param.q_max(n),CTM_param.q_max(n)],'b','LineWidth',3)
             plot(density_green,p_green,'y','LineWidth',3)
             plot(density_red,p_red,'b','LineWidth',3)
+            title_str3 = ['(Cell ',num2str(n),')'];
+            title(title_str3)
             fff = figure(last_fig_num+3);
             subplot(n_row,ceil((N-1)/n_row),n)
             yy = 1: length(density);
             scatter(yy,density,[],color,'filled')
+            title_str3 = ['Density (Cell ',num2str(n),')'];
+            title(title_str3)
             grid on
         end
 end
