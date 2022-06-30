@@ -1,4 +1,4 @@
-function  out_structure = csv_DATEX_reader_v3(input_str,output_str,opt,extra)
+function  out_structure = csv_DATEX_reader_v4(input_str,output_str,opt,extra)
 %% csv_DATEX_reader :
 % The funciton that reads the raw traffic data file and then creates a
 % structure as output with all the data nicely organized and ready to be
