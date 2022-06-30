@@ -269,6 +269,11 @@ try
             % number every hour ( changed wrt v1.0 )
             flow = sensor(j).vehicle_number./sensor(j).sample_time; % [veh/h] 
             density = flow./sensor(j).vehicle_speed;
+            for i = 1:length(density)
+                if density(i) < 0
+                    density(i) = 0;
+                end
+            end
             sensor(j).flow = flow;
             sensor(j).density = density;
         end
