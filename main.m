@@ -1,9 +1,8 @@
-clear all
+clearvars
 close all
 clc
 p = genpath('fnc');
 addpath(p);
-sensori = 0; %1=file sette sensori
 
 %% Identification of CTM
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -27,28 +26,24 @@ sensori = 0; %1=file sette sensori
 
 
 %% 1. Data extraction
-% Extract the data about traffic from the file 'export4_light' stored in
+% Extract the data about traffic from the file 'intensiteit-snelheid-export' stored in
 % the folder: >fnc>data_reader>traffic_data
-
-% print information on the steps performed
-opt_DATEX.verbatim = 1;
 
 % plot the data obtained graphs
 opt_DATEX.display = 1;
 
-% load previously extracted data, i.e., 1 if wants load
-% previously extracted data and 0 if you desire to
-% extract it from the raw data
-opt_DATEX.load = 0;
+opt_DATEX.path = 'C:\A_Tesi\CTM-identification\fnc\data_reader\extracted_data';
+%opt_DATEX.path = 'C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTM-identification/fnc/data_reader/extracted_data/';
+%opt_DATEX.path = 'H:\Il mio Drive\Tesi magistrale\CTM-identification\fnc\data_reader\extracted_data';
 
 % minimum frequency per minute at which you want the
 % data. Performs an interpolation if the data are
 % sampled at a lower rate
-extra.min_freq = 6;
+opt_DATEX.min_freq = 6;
 
-% extract the data from 'export4_light' and save the result in
-% 'data_structure4' and store it in the structure data
-data = csv_DATEX_reader_v4('intensiteit-snelheid-export','data_structure4_v2',opt_DATEX,extra);
+% extract the data from 'intensiteit-snelheid-export' and save the result in
+% 'data_structure4_v2' and store it in the structure data
+data = csv_DATEX_reader_v4('intensiteit-snelheid-export','data_structure4_v2',opt_DATEX);
 
 %% 2. CTM param identification
 % Identify the parameters of the CTM model
@@ -62,22 +57,18 @@ opt_identification.disp = 1;
 % threshold below which the vehicles are assumed to be into a congestion.
 % This was tuned for the problem at hand by looking at the plots attained
 % in 'cvs_DATEX_reader' regarding the velocity.
-if (sensori == 1)
-    opt_identification.speed_th = [78 98 99 95 95 95 95];
-else
-    opt_identification.speed_th = [80 85 90 90 90 90 ...
-                                   90 95 90 90 85 78];
-end
+
+opt_identification.speed_th = [80 85 90 90 90 90 ...
+                               90 95 90 90 85 78];
+
 
 % The threshold used in the quantile regression, these are tuned for the
 % particular date used in this example. The vector has to be as long as the
 % number of cells in teh CTM model.
-if (sensori == 1)
-    opt_identification.coeff_quantile = [0.95 0.95 0.8 0.90 0.9 0.9 0.9];
-else
-    opt_identification.coeff_quantile = [0.90 0.95 0.95 0.90 0.90 0.90 ...
-                                         0.95 0.90 0.95 0.90 0.90 0.95];
-end
+
+opt_identification.coeff_quantile = [0.90 0.95 0.95 0.90 0.90 0.90 ...
+                                     0.95 0.90 0.95 0.90 0.90 0.95];
+
 
 [CTM_param,phi_1] = CTM_identification(data,opt_identification);
 
