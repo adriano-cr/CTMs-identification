@@ -130,6 +130,10 @@ for n = 1:N_cell
     % fit the congestion case
     coeff_quantreg = opt.coeff_quantile;
     [f_red,~]= quantreg(density_red',flow_red',coeff_quantreg(n),1);
+    
+%     figure(88)
+%     plot(density_red,polyval(f_red,density_red))
+    
     p_red = polyval(f_red,density_red);
      
     CTM_param.w(n) = -f_red(1); % minus cause f_red is negative

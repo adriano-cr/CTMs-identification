@@ -242,9 +242,9 @@ try
         % assign the output
         out_structure = sensor;
         %% Save the file
-        save_file = ['C:\A_Tesi\CTM-identification\fnc\data_reader\extracted_data', output_str,'.mat'];
+        %save_file = ['C:\A_Tesi\CTM-identification\fnc\data_reader\extracted_data', output_str,'.mat'];
         %save_file = ['C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTM-identification/fnc/data_reader/extracted_data/', output_str,'.mat'];
-        %save_file = ['H:\Il mio Drive\Tesi magistrale\CTM-identification\fnc\data_reader\extracted_data', output_str,'.mat'];
+        save_file = ['H:\Il mio Drive\Tesi magistrale\CTM-identification\fnc\data_reader\extracted_data', output_str,'.mat'];
         save(save_file,'sensor')
         if opt.verbatim
             fprintf('6) Save the data in %s\n',save_file)
