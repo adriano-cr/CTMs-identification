@@ -40,9 +40,9 @@ try
     disp('==============================')
 
     % import in a cell
-    import_raw = importdata(filename);
+    import_raw = importdata(filename, ';');
     cell_raw = import_raw.textdata;
-    cell_raw(2:end,7) = num2cell(import_raw.data(:,1)); % fare dinamico
+    cell_raw(2:end,10) = num2cell(import_raw.data(:,1)); % fare dinamico
     % create an empty structure
     data = struct();
 
@@ -116,13 +116,13 @@ try
         % and due to sensor failure
         for k = 1 : length(sensor(j).veh_number)
             if(sensor(j).veh_avg_speed(k) < 0 )
-                %                     if (k==length(sensor(j).veh_number))
-                %                         next_veh = 0;
-                %                         next_speed = 0;
-                %                     else
-                %                         next_veh = sensor(j).veh_number(k+1);
-                %                         next_speed = sensor(j).veh_avg_speed(k+1);
-                %                     end
+%                 if (k==length(sensor(j).veh_number))
+%                     next_veh = 0;
+%                     next_speed = 0;
+%                 else
+%                     next_veh = sensor(j).veh_number(k+1);
+%                     next_speed = sensor(j).veh_avg_speed(k+1);
+%                 end
                 sensor(j).veh_avg_speed(k) = 0;
             end
         end

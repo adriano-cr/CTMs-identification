@@ -68,6 +68,8 @@ try
         'sample_time', 'avg_intensity', 'avg_speed', ...
         'num_lanes', 'lane_id', 'latitude', ...
         'longitude', 'position'});
+    A = table2cell(T);
+    
 
     % collect all the data that are measured in the same time interval, they
     % are assumed consecutive
@@ -78,13 +80,13 @@ try
     % create a temporary structure
     %sensor_sum(length(sensors_id)) = struct(); %preallocate space for speed-up
 
-    T_extra = T;
+    A_extra = A;
 
-    for i = 1:height(T)
-        if cell2mat(extractAfter(T.lane_id(i), 4)) > 3
-            T(i, :) = [];
+    for i = 1:height(A)
+        if str2double(cell2mat(extractAfter(A(i,8), 4))) > 3
+            A(i, :) = [];
         else
-            T_extra(i, :) = [];
+            A_extra(i, :) = [];
         end
     end
 %             k = 1;
