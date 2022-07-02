@@ -43,7 +43,7 @@ opt_DATEX.min_freq = 6;
 
 % extract the data from 'intensiteit-snelheid-export' and save the result in
 % 'data_structure4_v2' and store it in the structure data
-data = csv_DATEX_reader_v4('intensiteit-snelheid-export','data_structure4_v2',opt_DATEX);
+data = csv_DATEX_reader_v5('intensiteit-snelheid-export','data_structure4_v2',opt_DATEX);
 
 %% 2. CTM param identification
 % Identify the parameters of the CTM model
