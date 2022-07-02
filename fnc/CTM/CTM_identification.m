@@ -71,10 +71,11 @@ for n = 1:N_cell
 
     %% Cell length & time
     % position sensor n
-    position_s1 = cell2mat(data(n).position(1));
-    % position sensor n
-    position_s2 = cell2mat(data(n+1).position(1));
-    CTM_param.len(n) = 10^(-3)*(abs(position_s2-position_s1)); % [km]
+    lat1=(cell2mat(data(n).latitude(1)));
+    long1=(cell2mat(data(n).longitude(1)));
+    lat2=(cell2mat(data(n+1).latitude(1)));
+    long2=(cell2mat(data(n+1).longitude(1)));    
+    [CTM_param.len(n),~,~] = haversine([lat1 long1], [lat2 long2]);
     CTM_param.T(n) = data(1).sample_time(1); % [h]
     
     %% Flow

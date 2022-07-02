@@ -39,7 +39,7 @@ opt_DATEX.path = 'C:\A_Tesi\CTM-identification\fnc\data_reader\extracted_data';
 % minimum frequency per minute at which you want the
 % data. Performs an interpolation if the data are
 % sampled at a lower rate
-opt_DATEX.min_freq = 6;
+opt_DATEX.min_freq = 9;
 
 % extract the data from 'intensiteit-snelheid-export' and save the result in
 % 'data_structure4_v2' and store it in the structure data
