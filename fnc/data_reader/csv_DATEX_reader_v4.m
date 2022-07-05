@@ -231,12 +231,17 @@ try
             flow_in = [flow_in sensor_ss(2).veh_number(i)];
            
         end
+
+        beta = sensor_sum(3).vehicle_number ./flow_in;
         figure(77)
         plot(linspace(1,length(flow_in),length(flow_in)), flow_in)
-        title('flow_in');
+        title('flow in');
         figure(88)
         plot(linspace(1,length(flow_out),length(flow_out)),flow_out)
-        title('flow_out');
+        title('flow out');
+        figure(99)
+        plot(linspace(1,length(beta),length(beta)),beta)
+        title('beta');
 
     %% Interpolate the data
     % if the minimum frequency is higher than the one of the
