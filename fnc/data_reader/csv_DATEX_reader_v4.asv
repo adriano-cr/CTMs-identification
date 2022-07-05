@@ -217,7 +217,6 @@ try
             sensor_sum(i).ending_time(k) = sensor_main(i).ending_s_time(j);
             sensor_sum(i).starting_time(k) = sensor_main(i).starting_s_time(j);
             sensor_sum(i).sample_time(k) = sensor_main(i).time_sample(j);
-
             k = k+1;
         end
     end
@@ -227,17 +226,32 @@ try
         flow_out=[];
         
         disp('==============================')
-        for i=1: length(sensor_ss(1).vehicle_number)-1
-            flow_in = [flow_in sensor_ss(3).vehicle_number(i)-sensor_ss(2).vehicle_number(i)];
-            flow_out = [flow_out sensor_ss(1).vehicle_number(i)-sensor_ss(2).vehicle_number(i)];
+        for i=1: length(sensor_ss(1).veh_number)
+            flow_out = [flow_out sensor_ss(1).veh_number(i)];
+            flow_in = [flow_in sensor_ss(2).veh_number(i)];
            
         end
+
+        %beta = sensor_sum(3).vehicle_number ./flow_in;
+        beta = flow_in./(flow_in + sensor_sum(3).vehicle_number);
         figure(77)
-        scatter(linspace(1,length(flow_in),length(flow_in)), flow_in)
-        figure(88)
-        scatter(linspace(1,length(flow_in),length(flow_in)),flow_out)
+        plot(linspace(1,24,length(flow_in)), flow_in)
+        grid on
+        hold on
+        title('flow in');
+        %figure(88)
+        plot(linspace(1,24,length(flow_out)),flow_out)
+        grid on
+        title('flow out');
         figure(99)
-        scatter(linspace(1,length(s),length(s)),s)
+        x=linspace(1,24,length(beta));
+        scatter(x,beta, 'x')
+        hold on
+        [p,S] = polyfit(x, beta, 3); 
+        [y_fit,delta]= polyval(p,x,S);
+        plot(x,y_fit)
+        grid on
+        title('beta');
 
     %% Interpolate the data
     % if the minimum frequency is higher than the one of the

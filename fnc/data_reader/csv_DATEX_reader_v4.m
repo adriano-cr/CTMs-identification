@@ -232,15 +232,24 @@ try
            
         end
 
-        beta = sensor_sum(3).vehicle_number ./flow_in;
+        
+        beta = flow_in./(flow_in + sensor_sum(3).vehicle_number);
         figure(77)
-        plot(linspace(1,length(flow_in),length(flow_in)), flow_in)
-        title('flow in');
-        figure(88)
-        plot(linspace(1,length(flow_out),length(flow_out)),flow_out)
-        title('flow out');
+        plot(linspace(1,24,length(flow_in)), flow_in)
+        hold on
+        plot(linspace(1,24,length(flow_out)),flow_out)
+        grid on
+        title('flow in vs out');
+        
         figure(99)
-        plot(linspace(1,length(beta),length(beta)),beta)
+        x=linspace(1,24,length(beta));
+        scatter(x,beta, 'x')
+        hold on
+        [p,S] = polyfit(x, beta, 5); 
+        [y_fit,delta]= polyval(p,x,S);
+        plot(x,y_fit,'r-')
+        plot(x,y_fit+1.5*delta,'m--',x,y_fit-1.5*delta,'m--')
+        grid on
         title('beta');
 
     %% Interpolate the data
