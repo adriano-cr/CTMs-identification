@@ -42,9 +42,9 @@ try
     % import in a cell
     import_raw = importdata(filename, ';');
     cell_raw = import_raw.textdata;
-    cell_raw(2:end,8) = num2cell(import_raw.data(:,1)); % fare dinamico
-    cell_raw(2:end,9) = num2cell(import_raw.data(:,2)); % fare dinamico
-    cell_raw(2:end,10) = num2cell(import_raw.data(:,3)); % fare dinamico
+    cell_raw(2:end,10) = num2cell(import_raw.data(:,1)); % fare dinamico
+    cell_raw(2:end,11) = num2cell(import_raw.data(:,2)); % fare dinamico
+
     % create an empty structure
     data = struct();
 
@@ -94,60 +94,90 @@ try
     % find different inde associated to the different sensors
 
     fprintf('4) Organizing in struct sensor : %s \n', 'sensor')
-
+    lane_ss = "lane6";
     sensor(length(sensors_id)) = struct(); %preallocate space for speed-up
+    
     for j = 1:length(sensors_id)
 
-        check_sensor = strfind(data.naam_meetlocatie_mst,sensors_id(j));
+        check_sensor = strfind(erase(extractAfter(string(data.naam_meetlocatie_mst), 8), 'ra'),sensors_id(j));
         sensor_index = zeros(length(check_sensor),1);
 
         for i = 1:length(check_sensor)
             sensor_index(i) = ~isempty(cell2mat(check_sensor(i)));
         end
         sensor_index = logical(sensor_index);
-
-        sensor(j).id = sensors_id(j);
-        sensor(j).veh_number = str2double(data.gem_intensiteit(sensor_index)); % the intensity of vehicles over one h
-        sensor(j).veh_avg_speed = str2double(data.gem_snelheid(sensor_index));
-        sensor(j).time_sample = str2double(data.gebruikte_minuten_intensiteit(sensor_index)); %sample time is not always consistent even though the most cases it is
-        sensor(j).ending_s_time = data.eind_meetperiode(sensor_index);
-        sensor(j).starting_s_time = data.start_meetperiode(sensor_index);
-        sensor(j).latitude = data.start_locatie_latitude(sensor_index);
-        sensor(j).longitude = data.start_locatie_longitude(sensor_index);
-        sensor(j).lane = data.rijstrook_rijbaan(sensor_index);
+        
+        
+            
+        
+            sensor(j).lane = data.rijstrook_rijbaan(sensor_index);
+            sensor(j).id = sensors_id(j);
+            sensor(j).veh_number = str2double(data.gem_intensiteit(sensor_index)); % the intensity of vehicles over one h
+            sensor(j).veh_avg_speed = str2double(data.gem_snelheid(sensor_index));
+            sensor(j).time_sample = str2double(data.gebruikte_minuten_intensiteit(sensor_index)); %sample time is not always consistent even though the most cases it is
+            sensor(j).ending_s_time = data.eind_meetperiode(sensor_index);
+            sensor(j).starting_s_time = data.start_meetperiode(sensor_index);
+            sensor(j).latitude = data.start_locatie_latitude(sensor_index);
+            sensor(j).longitude = data.start_locatie_longitude(sensor_index);
+        
     end
 
- 
+   kk=1;
+   jj=1;
+   flag=false;
+   flag2=false;
+ for j = 1:length(sensors_id)
+     k=1;
+     p=1;
+     for i = 1 : length(sensor(j).lane)
+        app = sensor(j).lane(i);
+        if(strcmp(lane_ss, app))
+            sensor_ss(kk).id = sensor(j).id;
+            sensor_ss(kk).veh_number(k) = sensor(j).veh_number(i); 
+            sensor_ss(kk).veh_avg_speed(k) = sensor(j).veh_avg_speed(i);
+            if(sensor_ss(kk).veh_avg_speed(k)<0)
+                sensor_ss(kk).veh_avg_speed(k)=0;
+            end
+            sensor_ss(kk).time_sample(k) = sensor(j).time_sample(i); %sample time is not always consistent even though the most cases it is
+            sensor_ss(kk).ending_s_time(k) = sensor(j).ending_s_time(i);
+            sensor_ss(kk).starting_s_time(k) = sensor(j).starting_s_time(i);
+            sensor_ss(kk).latitude(k) =  sensor(j).latitude(i);
+            sensor_ss(kk).longitude(k) = sensor(j).longitude(i);
+            sensor_ss(kk).lane(k) =  sensor(j).lane(i);
+            k=k+1;
+            flag=true;
+        else
+            sensor_main(jj).id = sensor(j).id;
+            sensor_main(jj).veh_number(p) = sensor(j).veh_number(i); 
+            sensor_main(jj).veh_avg_speed(p) = sensor(j).veh_avg_speed(i);
+            if(sensor_main(jj).veh_avg_speed(p)<0)
+                sensor_main(jj).veh_avg_speed(p)=0;
+            end
+            sensor_main(jj).time_sample(p) = sensor(j).time_sample(i); %sample time is not always consistent even though the most cases it is
+            sensor_main(jj).ending_s_time(p) = sensor(j).ending_s_time(i);
+            sensor_main(jj).starting_s_time(p) = sensor(j).starting_s_time(i);
+            sensor_main(jj).latitude(p) =  sensor(j).latitude(i);
+            sensor_main(jj).longitude(p) = sensor(j).longitude(i);
+            sensor_main(jj).lane(p) =  sensor(j).lane(i);
+            p=p+1;
+            flag2=true;
+        end
+     end
+     if flag
+         kk=kk+1;
+         flag=false;
+     end
+     if flag2
+         jj=jj+1;
+         flag2=false;
+     end
+ end
+
 
     fprintf('5) Reshaping the data \n')
-    
-    % check corrupted data, hence zeros that should not be there
-    % and due to sensor failure
-    for j = 1:length(sensors_id)
-        for k = 1 : length(sensor(j).veh_number)
-            if(sensor(j).veh_number(k) <= 0)
-                if (k<3)
-                    prev_veh = 0;
-                    prev_speed = 0;
-                else
-                    prev_veh = sensor(j).veh_number(k-3);
-                    prev_speed = sensor(j).veh_avg_speed(k-3);
-                end
-                if (k>length(sensor(j).veh_number)-3)
-                    next_veh = 0;
-                    next_speed = 0;
-                else
-                    next_veh = sensor(j).veh_number(k+3);
-                    next_speed = sensor(j).veh_avg_speed(k+3);
-                end
-                sensor(j).veh_avg_speed(k) = round((prev_speed+next_speed)/2);
-                sensor(j).veh_number(k) = round((prev_veh+next_veh)/2);
-                if(sensor(j).veh_avg_speed(k)<0)
-                    sensor(j).veh_avg_speed(k) = 0;
-                end
-            end
-        end
-    end
+
+
+
 
     % collect all the data that are measured in the same time interval, they
     % are assumed consecutive
@@ -156,91 +186,109 @@ try
 
     for i = 1:length(sensors_id)
         k = 1;
-        for j = 1:3:length(sensor(i).time_sample)
-            veh1 = sensor(i).veh_number(j);
-            veh2 = sensor(i).veh_number(j+1);
-            veh3 = sensor(i).veh_number(j+2);
+        for j = 1:5:length(sensor_main(i).starting_s_time)
+            veh1 = sensor_main(i).veh_number(j);
+            veh2 = sensor_main(i).veh_number(j+1);
+            veh3 = sensor_main(i).veh_number(j+2);
+            veh4 = sensor_main(i).veh_number(j+3);
+            veh5 = sensor_main(i).veh_number(j+4);
+            
+            total_veh = veh1 + veh2 + veh3+veh4+veh5;
 
-            total_veh = veh1 + veh2 + veh3;
+            vel1 = sensor_main(i).veh_avg_speed(j);
+            vel2 = sensor_main(i).veh_avg_speed(j+1);
+            vel3 = sensor_main(i).veh_avg_speed(j+2);
+            vel4 = sensor_main(i).veh_avg_speed(j+3);
+            vel5 = sensor_main(i).veh_avg_speed(j+4);
 
-            vel1 = sensor(i).veh_avg_speed(j);
-            vel2 = sensor(i).veh_avg_speed(j+1);
-            vel3 = sensor(i).veh_avg_speed(j+2);
 
             if total_veh == 0
                 w_avg_speed = 0;
             else
-                w_avg_speed = (vel1 * veh1 + vel2 * veh2 + vel3 * veh3)/total_veh;
+                w_avg_speed = (vel1 * veh1 + vel2 * veh2 + vel3 * veh3 + veh4*vel4 + veh5*vel5)/total_veh;
             end
 
             sensor_sum(i).vehicle_number(k) = total_veh;
             sensor_sum(i).vehicle_speed(k) = w_avg_speed;
-            sensor_sum(i).latitude(k) = sensor(i).latitude(j);
-            sensor_sum(i).longitude(k) = sensor(i).longitude(j);
-            sensor_sum(i).lane(k) = sensor(i).lane(j);
-            sensor_sum(i).ending_time(k) = sensor(i).ending_s_time(j);
-            sensor_sum(i).starting_time(k) = sensor(i).starting_s_time(j);
-            sensor_sum(i).sample_time(k) = sensor(i).time_sample(j);
-            
+            sensor_sum(i).latitude(k) = sensor_main(i).latitude(j);
+            sensor_sum(i).longitude(k) = sensor_main(i).longitude(j);
+            sensor_sum(i).lane(k) = sensor_main(i).lane(j);
+            sensor_sum(i).id = sensor_main(i).id;
+            sensor_sum(i).ending_time(k) = sensor_main(i).ending_s_time(j);
+            sensor_sum(i).starting_time(k) = sensor_main(i).starting_s_time(j);
+            sensor_sum(i).sample_time(k) = sensor_main(i).time_sample(j);
             k = k+1;
         end
     end
 
-    sensor = sensor_sum;
 
-    disp('==============================')
-
+        flow_in=[];
+        flow_out=[];
+        
+        disp('==============================')
+        for i=1: length(sensor_ss(1).veh_number)
+            flow_out = [flow_out sensor_ss(1).veh_number(i)];
+            flow_in = [flow_in sensor_ss(2).veh_number(i)];
+           
+        end
+        figure(77)
+        plot(linspace(1,length(flow_in),length(flow_in)), flow_in)
+        title('flow_in');
+        figure(88)
+        plot(linspace(1,length(flow_out),length(flow_out)),flow_out)
+        title('flow_out');
 
     %% Interpolate the data
     % if the minimum frequency is higher than the one of the
     % data we interpolate the data to attain the desired one
-    if ~isempty(min_freq) && sensor(1).sample_time(1) > 1/min_freq
+    if ~isempty(min_freq) && sensor_sum(1).sample_time(1) > 1/min_freq
 
         for k = 1: length(sensors_id)
-            xx = 1:length(sensor(k).vehicle_number);
+            xx = 1:length(sensor_sum(k).vehicle_number);
             % every element in xx is made into "min_freq" many in yy
-            yy = 1:1/min_freq:length(sensor(k).vehicle_number);
-            number_v = sensor(k).vehicle_number;
+            yy = 1:1/min_freq:length(sensor_sum(k).vehicle_number);
+            number_v = sensor_sum(k).vehicle_number;
             interpolated_number_vv = interp1(xx,number_v,yy);
             % This is  the correct one because "interpolated_number_vv"
             % is already in [veh/h] ( changed wrt v1.0 )
             interpolated_number_vv = round(interpolated_number_vv);
             % interpolate the velocity
-            speed_v = sensor(k).vehicle_speed;
+            speed_v = sensor_sum(k).vehicle_speed;
             interpolated_speed_vv = interp1(xx,speed_v,yy);
             % assign the new values
-            sensor(k).vehicle_speed = interpolated_speed_vv;
+            sensor_sum(k).vehicle_speed = interpolated_speed_vv;
             % extend the other fields in "sensor"
-            sensor(k).starting_time = repelem(sensor(k).starting_time,1,min_freq);
-            sensor(k).ending_time = repelem(sensor(k).ending_time,1,min_freq);
-            sensor(k).latitude = repelem(sensor(k).latitude, 1, min_freq);
-            sensor(k).longitude = repelem(sensor(k).longitude, 1, min_freq);
-            sensor(k).lane = repelem(sensor(k).lane, 1, min_freq);
+            sensor_sum(k).starting_time = repelem(sensor_sum(k).starting_time,1,min_freq);
+            sensor_sum(k).ending_time = repelem(sensor_sum(k).ending_time,1,min_freq);
+            sensor_sum(k).latitude = repelem(sensor_sum(k).latitude, 1, min_freq);
+            sensor_sum(k).longitude = repelem(sensor_sum(k).longitude, 1, min_freq);
+            sensor_sum(k).lane = repelem(sensor_sum(k).lane, 1, min_freq);
 
             % sample time in [h], from the site we have the data in
             % minutes hence we have to multiply 1/60 to achieve
-            sensor(k).sample_time = sensor(k).sample_time(1)/min_freq*ones(1,length(yy))*(1/60);
+            sensor_sum(k).sample_time = sensor_sum(k).sample_time(1)/min_freq*ones(1,length(yy))*(1/60);
             % Since the interpolated_number_vv is the number wrt to
             % hours, then we have to scale it wrt to the sample time.
             %sensor(k).vehicle_number = interpolated_number_vv;
             %sensor(k).vehicle_number = interpolated_number_vv./60;
-            sensor(k).vehicle_number = interpolated_number_vv.*sensor(k).sample_time;
+            sensor_sum(k).vehicle_number = interpolated_number_vv.*sensor_sum(k).sample_time;
         end
     end
 
     %% Compute the  fundamental diagram
     % we already have the flow, we just need the density
     for j = 1:length(sensors_id)
-        flow = sensor(j).vehicle_number./sensor(j).sample_time; % [veh/h]
- 
+        flow = sensor_sum(j).vehicle_number./sensor_sum(j).sample_time; % [veh/h]
         %flow = (sensor(j).vehicle_number./sensor(j).sample_time)./3; % [veh/h]
-        density = flow./sensor(j).vehicle_speed;
-
-        sensor(j).flow = flow;
-        sensor(j).density = density;
+        density = flow./sensor_sum(j).vehicle_speed;
+        sensor_sum(j).flow = flow;
+        sensor_sum(j).density = density;
     end
+
+
+
     % assign the output
-    out_structure = sensor;
+    out_structure = sensor_sum;
     %% Save the file
     save_file = [opt.path, output_str,'.mat'];
     save(save_file,'sensor')
@@ -248,44 +296,44 @@ try
     disp('==============================')
     %% Plot
 
-    if opt.display && length(sensor)>=4
-        traffic_data_plot(sensor)
-    end
+
+    traffic_data_plot(sensor_sum)
+
 catch ME
     keyboard
     rethrow(ME)
 end
 end
 
-function traffic_data_plot(sensor)
+function traffic_data_plot(sensor_sum)
 %% Plot some data
 last_fig_num = get(gcf,'Number');
-n_row = 3; N = size(sensor,2);
+n_row = 3; N = size(sensor_sum,2);
 for n = 1 : N
     % % % % % % % %
     figure(last_fig_num+1)
     subplot(n_row,ceil((N)/n_row),n)
-    bar(sensor(n).vehicle_number)
-    title_str1 = ['# vehicles (10s) (Sens. ',num2str(n),')'];
+    bar(sensor_sum(n).vehicle_number)
+    title_str1 = ['# vehicles (10s)-sens',sensor_sum(n).id];
     title(title_str1)
     grid on
 
     % % % % % % % %
     figure(last_fig_num+2)
     subplot(n_row,ceil((N)/n_row),n)
-    bar(sensor(n).vehicle_speed)
+    bar(sensor_sum(n).vehicle_speed)
     grid on
     ax = gca;
-    title_str2 = ['Avg. speed (Sens.',num2str(n),')'];
+    title_str2 = ['Avg. speed-sens',sensor_sum(n).id];
     title(title_str2)
     ax.YLim = [0,150];
 
     % % % % % % % %
     figure(last_fig_num+3)
     subplot(n_row,ceil((N)/n_row),n)
-    scatter(sensor(n).density,sensor(n).flow)
+    scatter(sensor_sum(n).density,sensor_sum(n).flow)
     grid on
-    title_str3 = ['Fundamental diagram (Sens. ',num2str(n),')'];
+    title_str3 = ['Fundamental diagram-sens',sensor_sum(n).id];
     title(title_str3)
 end
 end

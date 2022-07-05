@@ -32,8 +32,8 @@ addpath(p);
 % plot the data obtained graphs
 opt_DATEX.display = 1;
 
-%opt_DATEX.path = 'C:\A_Tesi\CTMs-identification\fnc\data_reader\extracted_data';
-opt_DATEX.path = 'C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/data_reader/extracted_data/';
+opt_DATEX.path = 'C:\A_Tesi\CTMs-identification\fnc\data_reader\extracted_data';
+%opt_DATEX.path = 'C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/data_reader/extracted_data/';
 %opt_DATEX.path = 'H:\Il mio Drive\Tesi magistrale\CTMs-identification\fnc\data_reader\extracted_data';
 
 % minimum frequency per minute at which you want the
@@ -43,7 +43,7 @@ opt_DATEX.min_freq = 9;
 
 % extract the data from 'intensiteit-snelheid-export' and save the result in
 % 'data_structure4_v2' and store it in the structure data
-data = csv_DATEX_reader_v4('south_bound_3lanes','data_structure4_v2',opt_DATEX);
+data = csv_DATEX_reader_v4('A4-northbound-burgerking','data_structure4_v2',opt_DATEX);
 
 %% 2. CTM param identification
 % Identify the parameters of the CTM model
@@ -70,17 +70,17 @@ opt_identification.coeff_quantile = [0.90 0.95 0.95 0.90 0.90 0.90 ...
                                      0.95 0.90 0.95 0.90 0.90 0.95];
 
 
-[CTM_param,phi_1] = CTM_identification(data,opt_identification);
+% [CTM_param,phi_1] = CTM_identification(data,opt_identification);
 
 %% write output data
-ID=linspace(1,CTM_param.N,CTM_param.N).';
-L=CTM_param.len;
-v=CTM_param.v_bar;
-w=CTM_param.w;
-q_max=CTM_param.q_max;
-rho_max=CTM_param.rho_max;
-T = table(ID,L,v,w,q_max,rho_max);
-writetable(T, "CTM_param_out.xls", 'Sheet',1);
-
-phi_1=table(phi_1.');
-writetable(phi_1, "CTM_param_out.xls", 'Sheet',2, 'WriteVariableNames', false);
+% ID=linspace(1,CTM_param.N,CTM_param.N).';
+% L=CTM_param.len;
+% v=CTM_param.v_bar;
+% w=CTM_param.w;
+% q_max=CTM_param.q_max;
+% rho_max=CTM_param.rho_max;
+% T = table(ID,L,v,w,q_max,rho_max);
+% writetable(T, "CTM_param_out.xls", 'Sheet',1);
+% 
+% phi_1=table(phi_1.');
+% writetable(phi_1, "CTM_param_out.xls", 'Sheet',2, 'WriteVariableNames', false);
