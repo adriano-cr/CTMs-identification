@@ -96,7 +96,7 @@ try
     fprintf('4) Organizing in struct sensor : %s \n', 'sensor')
     lane_ss = "lane6";
     sensor(length(sensors_id)) = struct(); %preallocate space for speed-up
-    
+
     for j = 1:length(sensors_id)
 
         check_sensor = strfind(erase(extractAfter(string(data.naam_meetlocatie_mst), 8), 'ra'),sensors_id(j));
@@ -106,79 +106,69 @@ try
             sensor_index(i) = ~isempty(cell2mat(check_sensor(i)));
         end
         sensor_index = logical(sensor_index);
-        
-        
-            
-        
-            sensor(j).lane = data.rijstrook_rijbaan(sensor_index);
-            sensor(j).id = sensors_id(j);
-            sensor(j).veh_number = str2double(data.gem_intensiteit(sensor_index)); % the intensity of vehicles over one h
-            sensor(j).veh_avg_speed = str2double(data.gem_snelheid(sensor_index));
-            sensor(j).time_sample = str2double(data.gebruikte_minuten_intensiteit(sensor_index)); %sample time is not always consistent even though the most cases it is
-            sensor(j).ending_s_time = data.eind_meetperiode(sensor_index);
-            sensor(j).starting_s_time = data.start_meetperiode(sensor_index);
-            sensor(j).latitude = data.start_locatie_latitude(sensor_index);
-            sensor(j).longitude = data.start_locatie_longitude(sensor_index);
-        
+        sensor(j).lane = data.rijstrook_rijbaan(sensor_index);
+        sensor(j).id = sensors_id(j);
+        sensor(j).veh_number = str2double(data.gem_intensiteit(sensor_index)); % the intensity of vehicles over one h
+        sensor(j).veh_avg_speed = str2double(data.gem_snelheid(sensor_index));
+        sensor(j).time_sample = str2double(data.gebruikte_minuten_intensiteit(sensor_index)); %sample time is not always consistent even though the most cases it is
+        sensor(j).ending_s_time = data.eind_meetperiode(sensor_index);
+        sensor(j).starting_s_time = data.start_meetperiode(sensor_index);
+        sensor(j).latitude = data.start_locatie_latitude(sensor_index);
+        sensor(j).longitude = data.start_locatie_longitude(sensor_index);
     end
 
-   kk=1;
-   jj=1;
-   flag=false;
-   flag2=false;
- for j = 1:length(sensors_id)
-     k=1;
-     p=1;
-     for i = 1 : length(sensor(j).lane)
-        app = sensor(j).lane(i);
-        if(strcmp(lane_ss, app))
-            sensor_ss(kk).id = sensor(j).id;
-            sensor_ss(kk).veh_number(k) = sensor(j).veh_number(i); 
-            sensor_ss(kk).veh_avg_speed(k) = sensor(j).veh_avg_speed(i);
-            if(sensor_ss(kk).veh_avg_speed(k)<0)
-                sensor_ss(kk).veh_avg_speed(k)=0;
+    kk=1;
+    jj=1;
+    flag=false;
+    flag2=false;
+    for j = 1:length(sensors_id)
+        k=1;
+        p=1;
+        for i = 1 : length(sensor(j).lane)
+            app = sensor(j).lane(i);
+            if(strcmp(lane_ss, app))
+                sensor_ss(kk).id = sensor(j).id;
+                sensor_ss(kk).veh_number(k) = sensor(j).veh_number(i);
+                sensor_ss(kk).veh_avg_speed(k) = sensor(j).veh_avg_speed(i);
+                if(sensor_ss(kk).veh_avg_speed(k)<0)
+                    sensor_ss(kk).veh_avg_speed(k)=0;
+                end
+                sensor_ss(kk).time_sample(k) = sensor(j).time_sample(i); %sample time is not always consistent even though the most cases it is
+                sensor_ss(kk).ending_s_time(k) = sensor(j).ending_s_time(i);
+                sensor_ss(kk).starting_s_time(k) = sensor(j).starting_s_time(i);
+                sensor_ss(kk).latitude(k) =  sensor(j).latitude(i);
+                sensor_ss(kk).longitude(k) = sensor(j).longitude(i);
+                sensor_ss(kk).lane(k) =  sensor(j).lane(i);
+                k=k+1;
+                flag=true;
+            else
+                sensor_main(jj).id = sensor(j).id;
+                sensor_main(jj).veh_number(p) = sensor(j).veh_number(i);
+                sensor_main(jj).veh_avg_speed(p) = sensor(j).veh_avg_speed(i);
+                if(sensor_main(jj).veh_avg_speed(p)<0)
+                    sensor_main(jj).veh_avg_speed(p)=0;
+                end
+                sensor_main(jj).time_sample(p) = sensor(j).time_sample(i); %sample time is not always consistent even though the most cases it is
+                sensor_main(jj).ending_s_time(p) = sensor(j).ending_s_time(i);
+                sensor_main(jj).starting_s_time(p) = sensor(j).starting_s_time(i);
+                sensor_main(jj).latitude(p) =  sensor(j).latitude(i);
+                sensor_main(jj).longitude(p) = sensor(j).longitude(i);
+                sensor_main(jj).lane(p) =  sensor(j).lane(i);
+                p=p+1;
+                flag2=true;
             end
-            sensor_ss(kk).time_sample(k) = sensor(j).time_sample(i); %sample time is not always consistent even though the most cases it is
-            sensor_ss(kk).ending_s_time(k) = sensor(j).ending_s_time(i);
-            sensor_ss(kk).starting_s_time(k) = sensor(j).starting_s_time(i);
-            sensor_ss(kk).latitude(k) =  sensor(j).latitude(i);
-            sensor_ss(kk).longitude(k) = sensor(j).longitude(i);
-            sensor_ss(kk).lane(k) =  sensor(j).lane(i);
-            k=k+1;
-            flag=true;
-        else
-            sensor_main(jj).id = sensor(j).id;
-            sensor_main(jj).veh_number(p) = sensor(j).veh_number(i); 
-            sensor_main(jj).veh_avg_speed(p) = sensor(j).veh_avg_speed(i);
-            if(sensor_main(jj).veh_avg_speed(p)<0)
-                sensor_main(jj).veh_avg_speed(p)=0;
-            end
-            sensor_main(jj).time_sample(p) = sensor(j).time_sample(i); %sample time is not always consistent even though the most cases it is
-            sensor_main(jj).ending_s_time(p) = sensor(j).ending_s_time(i);
-            sensor_main(jj).starting_s_time(p) = sensor(j).starting_s_time(i);
-            sensor_main(jj).latitude(p) =  sensor(j).latitude(i);
-            sensor_main(jj).longitude(p) = sensor(j).longitude(i);
-            sensor_main(jj).lane(p) =  sensor(j).lane(i);
-            p=p+1;
-            flag2=true;
         end
-     end
-     if flag
-         kk=kk+1;
-         flag=false;
-     end
-     if flag2
-         jj=jj+1;
-         flag2=false;
-     end
- end
-
+        if flag
+            kk=kk+1;
+            flag=false;
+        end
+        if flag2
+            jj=jj+1;
+            flag2=false;
+        end
+    end
 
     fprintf('5) Reshaping the data \n')
-
-
-
-
     % collect all the data that are measured in the same time interval, they
     % are assumed consecutive
     % create a temporary structure
@@ -192,7 +182,7 @@ try
             veh3 = sensor_main(i).veh_number(j+2);
             veh4 = sensor_main(i).veh_number(j+3);
             veh5 = sensor_main(i).veh_number(j+4);
-            
+
             total_veh = veh1 + veh2 + veh3+veh4+veh5;
 
             vel1 = sensor_main(i).veh_avg_speed(j);
@@ -200,14 +190,11 @@ try
             vel3 = sensor_main(i).veh_avg_speed(j+2);
             vel4 = sensor_main(i).veh_avg_speed(j+3);
             vel5 = sensor_main(i).veh_avg_speed(j+4);
-
-
             if total_veh == 0
                 w_avg_speed = 0;
             else
                 w_avg_speed = (vel1 * veh1 + vel2 * veh2 + vel3 * veh3 + veh4*vel4 + veh5*vel5)/total_veh;
             end
-
             sensor_sum(i).vehicle_number(k) = total_veh;
             sensor_sum(i).vehicle_speed(k) = w_avg_speed;
             sensor_sum(i).latitude(k) = sensor_main(i).latitude(j);
@@ -221,36 +208,33 @@ try
         end
     end
 
+    flow_in=[];
+    flow_out=[];
+    disp('==============================')
 
-        flow_in=[];
-        flow_out=[];
-        
-        disp('==============================')
-        for i=1: length(sensor_ss(1).veh_number)
-            flow_out = [flow_out sensor_ss(1).veh_number(i)];
-            flow_in = [flow_in sensor_ss(2).veh_number(i)];
-           
-        end
+    for i=1: length(sensor_ss(1).veh_number)
+        flow_out = [flow_out sensor_ss(1).veh_number(i)];
+        flow_in = [flow_in sensor_ss(2).veh_number(i)];
 
-        
-        beta = flow_in./(flow_in + sensor_sum(3).vehicle_number);
-        figure(77)
-        plot(linspace(1,24,length(flow_in)), flow_in)
-        hold on
-        plot(linspace(1,24,length(flow_out)),flow_out)
-        grid on
-        title('flow in vs out');
-        
-        figure(99)
-        x=linspace(1,24,length(beta));
-        scatter(x,beta, 'x')
-        hold on
-        [p,S] = polyfit(x, beta, 5); 
-        [y_fit,delta]= polyval(p,x,S);
-        plot(x,y_fit,'r-')
-        plot(x,y_fit+1.5*delta,'m--',x,y_fit-1.5*delta,'m--')
-        grid on
-        title('beta');
+    end
+    beta = flow_in./(flow_in + sensor_sum(3).vehicle_number);
+    figure(77)
+    plot(linspace(1,24,length(flow_in)), flow_in)
+    hold on
+    plot(linspace(1,24,length(flow_out)),flow_out)
+    grid on
+    title('flow in vs out');
+
+    figure(99)
+    x=linspace(1,24,length(beta));
+    scatter(x,beta, 'x')
+    hold on
+    [p,S] = polyfit(x, beta, 5);
+    [y_fit,delta]= polyval(p,x,S);
+    plot(x,y_fit,'r-')
+    plot(x,y_fit+1.5*delta,'m--',x,y_fit-1.5*delta,'m--')
+    grid on
+    title('beta');
 
     %% Interpolate the data
     % if the minimum frequency is higher than the one of the
@@ -299,8 +283,6 @@ try
         sensor_sum(j).density = density;
     end
 
-
-
     % assign the output
     out_structure = sensor_sum;
     %% Save the file
@@ -309,8 +291,6 @@ try
     fprintf('6) Save the data in %s\n',save_file)
     disp('==============================')
     %% Plot
-
-
     traffic_data_plot(sensor_sum)
 
 catch ME

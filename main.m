@@ -39,11 +39,11 @@ opt_DATEX.path = 'C:\A_Tesi\CTMs-identification\fnc\data_reader\extracted_data';
 % minimum frequency per minute at which you want the
 % data. Performs an interpolation if the data are
 % sampled at a lower rate
-opt_DATEX.min_freq = 9;
+opt_DATEX.min_freq = 7;
 
 % extract the data from 'intensiteit-snelheid-export' and save the result in
 % 'data_structure4_v2' and store it in the structure data
-data = csv_DATEX_reader_v4('A4-northbound-burgerking','data_structure4_v2',opt_DATEX);
+data = csv_DATEX_reader_v5('A4-northbound-burgerking-6days','data_structure4_v2',opt_DATEX);
 
 %% 2. CTM param identification
 % Identify the parameters of the CTM model
@@ -58,7 +58,7 @@ opt_identification.disp = 1;
 % This was tuned for the problem at hand by looking at the plots attained
 % in 'cvs_DATEX_reader' regarding the velocity.
 
-opt_identification.speed_th = [80 85 90 90 90 90 ...
+opt_identification.speed_th = [90 85 90 90 90 90 ...
                                90 95 90 90 85 78];
 
 
@@ -66,13 +66,13 @@ opt_identification.speed_th = [80 85 90 90 90 90 ...
 % particular date used in this example. The vector has to be as long as the
 % number of cells in teh CTM model.
 
-opt_identification.coeff_quantile = [0.90 0.95 0.95 0.90 0.90 0.90 ...
+opt_identification.coeff_quantile = [0.87 0.75 0.75 0.90 0.90 0.90 ...
                                      0.95 0.90 0.95 0.90 0.90 0.95];
 
 
 % [CTM_param,phi_1] = CTM_identification(data,opt_identification);
-
-%% write output data
+% 
+% %% write output data
 % ID=linspace(1,CTM_param.N,CTM_param.N).';
 % L=CTM_param.len;
 % v=CTM_param.v_bar;
