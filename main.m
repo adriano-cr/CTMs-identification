@@ -32,8 +32,8 @@ addpath(p);
 % plot the data obtained graphs
 opt_DATEX.display = 1;
 
-opt_DATEX.path = 'C:\A_Tesi\CTMs-identification\fnc\data_reader\extracted_data';
-%opt_DATEX.path = 'C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/data_reader/extracted_data/';
+%opt_DATEX.path = 'C:\A_Tesi\CTMs-identification\fnc\data_reader\extracted_data';
+opt_DATEX.path = 'C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/data_reader/extracted_data/';
 %opt_DATEX.path = 'H:\Il mio Drive\Tesi magistrale\CTMs-identification\fnc\data_reader\extracted_data';
 
 % minimum frequency per minute at which you want the
@@ -43,7 +43,8 @@ opt_DATEX.min_freq = 7;
 
 % extract the data from 'intensiteit-snelheid-export' and save the result in
 % 'data_structure4_v2' and store it in the structure data
-data = csv_DATEX_reader_v5('A4-northbound-burgerking-6days','data_structure4_v2',opt_DATEX);
+%data = csv_DATEX_reader_v5('A4-northbound-burgerking-6days','data_structure4_v2',opt_DATEX);
+data = csv_DATEX_reader_v4('A20-eastbound','data_structure4_v2',opt_DATEX);
 
 %% 2. CTM param identification
 % Identify the parameters of the CTM model
