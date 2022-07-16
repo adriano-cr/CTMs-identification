@@ -42,15 +42,15 @@ try
     index=1;
     for i = 1:size(cell_raw,2)
         if(isempty(cell_raw{2,i}))
-            cell_raw(2:end,i) = num2cell(import_raw.data(:,index));            
+            cell_raw(2:end,i) = num2cell(import_raw.data(:,index));
             index=index+1;
         end
     end
 
     % create an empty structure
     data = struct();
-    
-    %% 
+
+    %%
     fprintf('2) Reading data... \n')
     %% Reading data: Header
     % the first row is the header,
@@ -103,31 +103,31 @@ try
         sensor(j).id = sensors_id(j);
         sensor(j).veh_number = str2double(data.gem_intensiteit(sensor_index)); % the intensity of vehicles over one h
         sensor(j).veh_avg_speed = str2double(data.gem_snelheid(sensor_index));
-        sensor(j).time_sample = str2double(data.gebruikte_minuten_intensiteit(sensor_index)); 
+        sensor(j).time_sample = str2double(data.gebruikte_minuten_intensiteit(sensor_index));
         sensor(j).ending_s_time = data.eind_meetperiode(sensor_index);
         sensor(j).starting_s_time = data.start_meetperiode(sensor_index);
         sensor(j).latitude = data.start_locatie_latitude(sensor_index);
         sensor(j).longitude = data.start_locatie_longitude(sensor_index);
     end
-    
-
+%% check errors due sensors failure
+error_count = 0;
     for j = 1:length(sensors_id)
-        for k=1:lenght(sensor(j).time_sample)
+        for k=1:length(sensor(j).time_sample)
             if(sensor(j).time_sample(k) ~= 1)
-
+                error_count= error_count+1;
                 if(k==1)
                     prec=0;
                 else
                     prec=sensor(j).veh_number(k-1);
                 end
-                if(k==lenght(sensor(j).time_sample))
+                if(k==length(sensor(j).time_sample))
                     next=0;
                 else
-                    next=sensor(j).veh_number(k-1);
+                    next=sensor(j).veh_number(k+1);
                 end
 
-
-                sensor(j).veh_number(k) =  (prec + next)/2;
+                sensor(j).time_sample(k) = 1;
+                sensor(j).veh_number(k)=next+prec)/;
             end
         end
     end
@@ -136,64 +136,58 @@ try
     %% divide data for main lanes and service station lanes
     fprintf('4) Splitting main lanes and service station lanes... \n')
     lane_ss = opt.laneSS;
-        kk=1;
-        jj=1;
-        flag=false;
-        flag2=false;
-        for j = 1:length(sensors_id)
-            k=1;
-            p=1;
-            for i = 1 : length(sensor(j).lane)
-                app = sensor(j).lane(i);
-                if(strcmp(lane_ss, app))
-                    sensor_ss(kk).id = sensor(j).id;
-                    sensor_ss(kk).veh_number(k) = sensor(j).veh_number(i);
-                    if(sensor_ss(jj).veh_number(p)<0)
-                        sensor_ss(jj).veh_number(p)=0;
-                    end
-                    sensor_ss(kk).veh_avg_speed(k) = sensor(j).veh_avg_speed(i);
-                    if(sensor_ss(kk).veh_avg_speed(k)<0)
-                        sensor_ss(kk).veh_avg_speed(k)=0;
-                    end
-                    sensor_ss(kk).time_sample(k) = sensor(j).time_sample(i); 
-                    sensor_ss(kk).ending_s_time(k) = sensor(j).ending_s_time(i);
-                    sensor_ss(kk).starting_s_time(k) = sensor(j).starting_s_time(i);
-                    sensor_ss(kk).latitude(k) =  sensor(j).latitude(i);
-                    sensor_ss(kk).longitude(k) = sensor(j).longitude(i);
-                    sensor_ss(kk).lane(k) =  sensor(j).lane(i);
-                    k=k+1;
-                    flag=true;
-                else
-                    sensor_main(jj).id = sensor(j).id;
-                    sensor_main(jj).veh_number(p) = sensor(j).veh_number(i);
-                    if(sensor_main(jj).veh_number(p)<0)
-                        sensor_main(jj).veh_number(p)=0;
-                    end
-                    sensor_main(jj).veh_avg_speed(p) = sensor(j).veh_avg_speed(i);
-                    if(sensor_main(jj).veh_avg_speed(p)<0)
-                        sensor_main(jj).veh_avg_speed(p)=0;
-                    end
-                    sensor_main(jj).time_sample(p) = sensor(j).time_sample(i); 
-                    sensor_main(jj).ending_s_time(p) = sensor(j).ending_s_time(i);
-                    sensor_main(jj).starting_s_time(p) = sensor(j).starting_s_time(i);
-                    sensor_main(jj).latitude(p) =  sensor(j).latitude(i);
-                    sensor_main(jj).longitude(p) = sensor(j).longitude(i);
-                    sensor_main(jj).lane(p) =  sensor(j).lane(i);
-                    p=p+1;
-                    flag2=true;
+    kk=1;
+    jj=1;
+    flag=false;
+    flag2=false;
+    for j = 1:length(sensors_id)
+        k=1;
+        p=1;
+        for i = 1 : length(sensor(j).lane)
+            app = sensor(j).lane(i);
+            if(strcmp(lane_ss, app))
+                sensor_ss(kk).id = sensor(j).id;
+                sensor_ss(kk).veh_number(k) = sensor(j).veh_number(i);
+                sensor_ss(kk).veh_avg_speed(k) = sensor(j).veh_avg_speed(i);
+                if(sensor_ss(kk).veh_avg_speed(k)<0)
+                    sensor_ss(kk).veh_avg_speed(k)=0;
                 end
-            end
-            if flag
-                kk=kk+1;
-                flag=false;
-            end
-            if flag2
-                jj=jj+1;
-                flag2=false;
+                sensor_ss(kk).time_sample(k) = sensor(j).time_sample(i);
+                sensor_ss(kk).ending_s_time(k) = sensor(j).ending_s_time(i);
+                sensor_ss(kk).starting_s_time(k) = sensor(j).starting_s_time(i);
+                sensor_ss(kk).latitude(k) =  sensor(j).latitude(i);
+                sensor_ss(kk).longitude(k) = sensor(j).longitude(i);
+                sensor_ss(kk).lane(k) =  sensor(j).lane(i);
+                k=k+1;
+                flag=true;
+            else
+                sensor_main(jj).id = sensor(j).id;
+                sensor_main(jj).veh_number(p) = sensor(j).veh_number(i);
+                sensor_main(jj).veh_avg_speed(p) = sensor(j).veh_avg_speed(i);
+                if(sensor_main(jj).veh_avg_speed(p)<0)
+                    sensor_main(jj).veh_avg_speed(p)=0;
+                end
+                sensor_main(jj).time_sample(p) = sensor(j).time_sample(i);
+                sensor_main(jj).ending_s_time(p) = sensor(j).ending_s_time(i);
+                sensor_main(jj).starting_s_time(p) = sensor(j).starting_s_time(i);
+                sensor_main(jj).latitude(p) =  sensor(j).latitude(i);
+                sensor_main(jj).longitude(p) = sensor(j).longitude(i);
+                sensor_main(jj).lane(p) =  sensor(j).lane(i);
+                p=p+1;
+                flag2=true;
             end
         end
-    
-    
+        if flag
+            kk=kk+1;
+            flag=false;
+        end
+        if flag2
+            jj=jj+1;
+            flag2=false;
+        end
+    end
+
+
     %% join the main lanes in one single measure per time interval
     fprintf('5) Joining main lanes... \n')
     sensor_sum(length(sensors_id)) = struct(); %preallocate space for speed-up
@@ -231,11 +225,11 @@ try
             k = k+1;
         end
     end
-%% calculate CTM-s parameters
+    %% calculate CTM-s parameters
     fprintf('6) Reshaping and interpolating the data... \n')
     id_sensor_input = opt.id_sensor_input;
     id_sensor_output = opt.id_sensor_output;
-   
+
 
     for i = 1:length(sensors_id)
         if(sensor_sum(i).id == id_sensor_output)
@@ -249,13 +243,13 @@ try
 
     flow_in=[];
     flow_out=[];
-%     disp('==============================')
-% 
-%     for i=1: length(sensor_ss(1).veh_number)
-%         flow_out = [flow_out sensor_ss(1).veh_number(i)];
-%         flow_in = [flow_in sensor_ss(2).veh_number(i)];
-% 
-%     end
+    %     disp('==============================')
+    %
+    %     for i=1: length(sensor_ss(1).veh_number)
+    %         flow_out = [flow_out sensor_ss(1).veh_number(i)];
+    %         flow_in = [flow_in sensor_ss(2).veh_number(i)];
+    %
+    %     end
     for i=1: length(sensor_sum(1).vehicle_number)
         flow_out = [flow_out (sensor_sum(index_sensor_output).vehicle_number(i) - sensor_sum(index_sensor_output-1).vehicle_number(i))];
         flow_in = [flow_in (sensor_sum(index_sensor_input).vehicle_number(i) - sensor_sum(index_sensor_input+1).vehicle_number(i))];
@@ -264,50 +258,48 @@ try
 
     delay = flow_out - flow_in;
     beta = flow_in./(sensor_sum(index_sensor_input).vehicle_number);
-
-   
     
-    figure(77)
-    x=linspace(1,24,length(flow_in));
-    scatter(x, flow_in)
-    hold on
-    scatter(x,flow_out)
-   
-    grid on
-    title('flow in vs out');
-    
-    
-    figure(777)
-    [p1,S1] = polyfit(x, flow_in, 5);
-    [y_fit_in,delta]= polyval(p1,x,S1);
-    plot(x,y_fit_in)
-   
-    grid on
-    hold on
-    [p2,S2] = polyfit(x, flow_out, 5);
-    [y_fit_out,delta]= polyval(p2,x,S2);
-    plot(x,y_fit_out)
-    legend('flow in', 'flow out')
-    title('poly flow in vs out');
+    if(opt.display>0)
+        figure(99)
+        x=linspace(1,24,length(flow_in));
+        scatter(x, flow_in)
+        hold on
+        scatter(x,flow_out)
+
+        grid on
+        title('flow in vs out');
+
+        figure(98)
+        [p1,S1] = polyfit(x, flow_in, 5);
+        [y_fit_in,delta]= polyval(p1,x,S1);
+        plot(x,y_fit_in)
+
+        grid on
+        hold on
+        [p2,S2] = polyfit(x, flow_out, 5);
+        [y_fit_out,delta]= polyval(p2,x,S2);
+        plot(x,y_fit_out)
+        legend('flow in', 'flow out')
+        title('poly flow in vs out');
 
 
-    figure(78)
-    plot(linspace(1,24,length(flow_in)), delay)
-    grid on
-    title('delay?');
+        figure(97)
+        plot(linspace(1,24,length(flow_in)), delay)
+        grid on
+        title('delay?');
 
-    figure(99)
-    x=linspace(1,24,length(beta));
-    scatter(x,beta, 'x')
-    hold on
-    [p,S] = polyfit(x, beta, 5);
-    [y_fit,delta]= polyval(p,x,S);
-    plot(x,y_fit,'r-')
-    plot(x,y_fit+1.5*delta,'m--',x,y_fit-1.5*delta,'m--')
-    grid on
-    title('beta');
-
-    %% Interpolate the data 
+        figure(96)
+        x=linspace(1,24,length(beta));
+        scatter(x,beta, 'x')
+        hold on
+        [p,S] = polyfit(x, beta, 5);
+        [y_fit,delta]= polyval(p,x,S);
+        plot(x,y_fit,'r-')
+        plot(x,y_fit+1.5*delta,'m--',x,y_fit-1.5*delta,'m--')
+        grid on
+        title('beta');
+    end
+    %% Interpolate the data
     % if the minimum frequency is higher than the one of the
     % data we interpolate the data to attain the desired one
     if ~isempty(min_freq) && sensor_sum(1).sample_time(1) > 1/min_freq
@@ -331,7 +323,7 @@ try
             sensor_sum(k).ending_time = repelem(sensor_sum(k).ending_time,1,min_freq);
             sensor_sum(k).latitude = repelem(sensor_sum(k).latitude, 1, min_freq);
             sensor_sum(k).longitude = repelem(sensor_sum(k).longitude, 1, min_freq);
-            
+
 
             % sample time in [h], from the site we have the data in
             % minutes hence we have to multiply 1/60 to achieve
@@ -354,8 +346,9 @@ try
         sensor_sum(j).density = density;
     end
     %% Plot
-    traffic_data_plot(sensor_sum)
-
+    if(opt.display>0)
+        traffic_data_plot(sensor_sum)
+    end
     %% Save the file and assign the output
     save_file = [opt.path, output_str,'.mat'];
     save(save_file,'sensor')
