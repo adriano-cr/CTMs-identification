@@ -70,19 +70,19 @@ opt_identification.speed_th = [85 85 80 90 90 90 90 ...
 
 opt_identification.coeff_quantile = [0.82 0.75 0.80 0.90 0.90 0.90 0.95...
                                      0.80 0.90 0.90 0.90 0.90 0.90 0.90];
-
-
-[CTM_param,phi_1] = CTM_identification(data,opt_identification);
-
-%% write output data
-ID=linspace(1,CTM_param.N,CTM_param.N).';
-L=CTM_param.len;
-v=CTM_param.v_bar;
-w=CTM_param.w;
-q_max=CTM_param.q_max;
-rho_max=CTM_param.rho_max;
-T = table(ID,L,v,w,q_max,rho_max);
-writetable(T, "CTM_param_out.xls", 'Sheet',1);
-
-phi_1=table(phi_1.');
-writetable(phi_1, "CTM_param_out.xls", 'Sheet',2, 'WriteVariableNames', false);
+% 
+% 
+% [CTM_param,phi_1] = CTM_identification(data,opt_identification);
+% 
+% %% write output data
+% ID=linspace(1,CTM_param.N,CTM_param.N).';
+% L=CTM_param.len;
+% v=CTM_param.v_bar;
+% w=CTM_param.w;
+% q_max=CTM_param.q_max;
+% rho_max=CTM_param.rho_max;
+% T = table(ID,L,v,w,q_max,rho_max);
+% writetable(T, "CTM_param_out.xls", 'Sheet',1);
+% 
+% phi_1=table(phi_1.');
+% writetable(phi_1, "CTM_param_out.xls", 'Sheet',2, 'WriteVariableNames', false);

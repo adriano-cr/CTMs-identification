@@ -109,28 +109,28 @@ try
         sensor(j).latitude = data.start_locatie_latitude(sensor_index);
         sensor(j).longitude = data.start_locatie_longitude(sensor_index);
     end
-%% check errors due sensors failure
-% error_count = 0;
-%     for j = 1:length(sensors_id)
-%         for k=1:length(sensor(j).time_sample)
-%             if(sensor(j).time_sample(k) ~= 1)
-%                 error_count= error_count+1;
-%                 if(k==1)
-%                     prec=0;
-%                 else
-%                     prec=sensor(j).veh_number(k-1);
-%                 end
-%                 if(k==length(sensor(j).time_sample))
-%                     next=0;
-%                 else
-%                     next=sensor(j).veh_number(k+1);
-%                 end
-% 
-%                 sensor(j).time_sample(k) = 1;
-%                 sensor(j).veh_number(k)=(next+prec)/2;
-%             end
-%         end
-%     end
+    %% check errors due sensors failure
+    % error_count = 0;
+    %     for j = 1:length(sensors_id)
+    %         for k=1:length(sensor(j).time_sample)
+    %             if(sensor(j).time_sample(k) ~= 1)
+    %                 error_count= error_count+1;
+    %                 if(k==1)
+    %                     prec=0;
+    %                 else
+    %                     prec=sensor(j).veh_number(k-1);
+    %                 end
+    %                 if(k==length(sensor(j).time_sample))
+    %                     next=0;
+    %                 else
+    %                     next=sensor(j).veh_number(k+1);
+    %                 end
+    %
+    %                 sensor(j).time_sample(k) = 1;
+    %                 sensor(j).veh_number(k)=(next+prec)/2;
+    %             end
+    %         end
+    %     end
 
 
     %% divide data for main lanes and service station lanes
@@ -256,43 +256,65 @@ try
 
     end
 
-    delay = flow_out - flow_in;
-    beta = flow_in./(sensor_sum(index_sensor_input).vehicle_number);
-    
+    flow_in_clean = filloutliers(flow_in,"nearest","percentiles",[40 98]);
+    flow_out_clean = filloutliers(flow_out,"nearest","percentiles",[20 85]);
+
+    delay = flow_out_clean - flow_in_clean;
+    beta = flow_in_clean./(sensor_sum(index_sensor_input).vehicle_number);
+
+    for i=1:length(beta)
+        if(isnan(beta(i)))
+            beta(i)=-1;
+        end
+    end
+
     if(opt.display>0)
-        figure(99)
-        x=linspace(1,24,length(flow_in));
-        scatter(x, flow_in)
+        x=linspace(1,24,length(flow_out_clean));
+        f_in_poly = fit(x',flow_in_clean','poly6');
+        f_out_poly = fit(x',flow_out_clean','poly6');
+        f_in_fou = fit(x',flow_in_clean','fourier5');
+        f_out_fou = fit(x',flow_out_clean','fourier5');
+        x_beta=linspace(1,24,length(beta));
+        f_beta = fit(x_beta',beta','fourier3');
+        
+        figure(1)
+        scatter(x,flow_in_clean,'x')
         hold on
-        scatter(x,flow_out)
+        plot(f_in_poly,'red')
+        plot(f_in_fou, 'black')
         grid on
-        title('flow in vs out');
+        legend('dati', 'polinomio', 'fourier')
+        title('flow in ripulito');
 
-        figure(98)
-        [p1,S1] = polyfit(x, flow_in, 5);
-        [y_fit_in,delta]= polyval(p1,x,S1);
-        plot(x,y_fit_in)
+        figure(2)
+        scatter(x,flow_out_clean,'x')
+        hold on
+        plot(f_out_poly,'red')
+        plot(f_out_fou, 'black')
+        legend('dati', 'polinomio', 'fourier')
+        grid on
+        title('flow out ripulito');
+
+        figure(3)
+        plot(f_in_poly,'red')
         grid on
         hold on
-        [p2,S2] = polyfit(x, flow_out, 5);
-        [y_fit_out,delta]= polyval(p2,x,S2);
-        plot(x,y_fit_out)
+        plot(f_out_poly,'blue')
         legend('flow in', 'flow out')
-        title('poly flow in vs out');
+        title('poly flow in vs out puliti');
 
-        figure(97)
-        plot(linspace(1,24,length(flow_in)), delay)
+        figure(4)
+        plot(f_in_fou,'red')
         grid on
-        title('delay?');
-
-        figure(96)
-        x=linspace(1,24,length(beta));
-        scatter(x,beta, 'x')
         hold on
-        [p,S] = polyfit(x, beta, 5);
-        [y_fit,delta]= polyval(p,x,S);
-        plot(x,y_fit,'r-')
-        plot(x,y_fit+1.5*delta,'m--',x,y_fit-1.5*delta,'m--')
+        plot(f_out_fou,'blue')
+        legend('flow in', 'flow out')
+        title('fourier flow in vs out puliti');
+
+        figure(5)
+        scatter(x_beta,beta)
+        hold on
+        plot(f_beta, 'red')
         grid on
         title('beta');
     end
