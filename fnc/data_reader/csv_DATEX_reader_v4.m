@@ -259,14 +259,16 @@ try
     flow_in_clean = filloutliers(flow_in,"nearest","percentiles",[40 98]);
     flow_out_clean = filloutliers(flow_out,"nearest","percentiles",[20 85]);
 
-    delay = flow_out_clean - flow_in_clean;
-    beta = flow_in_clean./(sensor_sum(index_sensor_input).vehicle_number);
+    %delay = flow_out_clean - flow_in_clean;
+    beta = flow_in./(sensor_sum(index_sensor_input).vehicle_number);
 
     for i=1:length(beta)
         if(isnan(beta(i)))
             beta(i)=-1;
         end
     end
+   
+
 
     if(opt.display>0)
         x=linspace(1,24,length(flow_out_clean));
@@ -275,8 +277,9 @@ try
         f_in_fou = fit(x',flow_in_clean','fourier5');
         f_out_fou = fit(x',flow_out_clean','fourier5');
         x_beta=linspace(1,24,length(beta));
-        f_beta = fit(x_beta',beta','fourier3');
-        
+        beta_outliers=excludedata(x_beta,beta,'range',[0 1]);
+        f_beta = fit(x_beta',beta','fourier2', 'Exclude', beta_outliers);
+         
         figure(1)
         scatter(x,flow_in_clean,'x')
         hold on
@@ -313,6 +316,7 @@ try
 
         figure(5)
         scatter(x_beta,beta)
+        h=findobj('tag','Outlier');
         hold on
         plot(f_beta, 'red')
         grid on

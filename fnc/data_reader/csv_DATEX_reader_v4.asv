@@ -256,78 +256,69 @@ try
 
     end
 
-
-
-
-
-
     flow_in_clean = filloutliers(flow_in,"nearest","percentiles",[40 98]);
     flow_out_clean = filloutliers(flow_out,"nearest","percentiles",[20 85]);
 
-    delay = flow_out_clean - flow_in_clean;
-    beta = flow_in_clean./(sensor_sum(index_sensor_input).vehicle_number);
+    %delay = flow_out_clean - flow_in_clean;
+    beta = flow_in./(sensor_sum(index_sensor_input).vehicle_number);
 
     for i=1:length(beta)
         if(isnan(beta(i)))
-        beta(i)=0;
+            beta(i)=-1;
         end
     end
 
 
-    x=linspace(1,24,length(flow_out_clean));
-    f_in_poly = fit(x',flow_in_clean','poly6'); 
-    f_out_poly = fit(x',flow_out_clean','poly6');
-    f_in_fou = fit(x',flow_in_clean','fourier5'); 
-    f_out_fou = fit(x',flow_out_clean','fourier5');
-    x_beta=linspace(1,24,length(beta));
-    f_beta = fit(x_beta',beta','fourier3');
+
     if(opt.display>0)
+        x=linspace(1,24,length(flow_out_clean));
+        f_in_poly = fit(x',flow_in_clean','poly6');
+        f_out_poly = fit(x',flow_out_clean','poly6');
+        f_in_fou = fit(x',flow_in_clean','fourier5');
+        f_out_fou = fit(x',flow_out_clean','fourier5');
+        x_beta=linspace(1,24,length(beta));
+        f_beta = fit(x_beta',beta','fourier3');
+        
+        figure(1)
+        scatter(x,flow_in_clean,'x')
+        hold on
+        plot(f_in_poly,'red')
+        plot(f_in_fou, 'black')
+        grid on
+        legend('dati', 'polinomio', 'fourier')
+        title('flow in ripulito');
 
+        figure(2)
+        scatter(x,flow_out_clean,'x')
+        hold on
+        plot(f_out_poly,'red')
+        plot(f_out_fou, 'black')
+        legend('dati', 'polinomio', 'fourier')
+        grid on
+        title('flow out ripulito');
 
-    figure(1)
-    scatter(x,flow_in_clean,'x')
-    hold on
-    plot(f_in_poly,'red')
-    plot(f_in_fou, 'black')
-    grid on
-    legend('dati', 'polinomio', 'fourier')
-    title('flow in ripulito');
+        figure(3)
+        plot(f_in_poly,'red')
+        grid on
+        hold on
+        plot(f_out_poly,'blue')
+        legend('flow in', 'flow out')
+        title('poly flow in vs out puliti');
 
-    figure(2)
-    scatter(x,flow_out_clean,'x')
-    hold on
-    plot(f_out_poly,'red')
-    plot(f_out_fou, 'black')
-    legend('dati', 'polinomio', 'fourier')
-    grid on
-    title('flow out ripulito');
+        figure(4)
+        plot(f_in_fou,'red')
+        grid on
+        hold on
+        plot(f_out_fou,'blue')
+        legend('flow in', 'flow out')
+        title('fourier flow in vs out puliti');
 
-    figure(3)
-    plot(f_in_poly,'red')
-    grid on
-    hold on
-    plot(f_out_poly,'blue')
-    legend('flow in', 'flow out')
-    title('poly flow in vs out puliti');
-
-    figure(4)
-    plot(f_in_fou,'red')
-    grid on
-    hold on
-    plot(f_out_fou,'blue')
-    legend('flow in', 'flow out')
-    title('fourier flow in vs out puliti');
-
-   
-    
-   
-    figure(5)
-    scatter(x_beta,beta)
-    hold on
-    plot(f_beta, 'red')
-    grid on
-    title('beta');
-
+        figure(5)
+        scatter(x_beta,beta)
+        hold on
+        plot(f_beta, 'red')
+        grid on
+        title('beta');
     end
     %% Interpolate the data
     % if the minimum frequency is higher than the one of the
