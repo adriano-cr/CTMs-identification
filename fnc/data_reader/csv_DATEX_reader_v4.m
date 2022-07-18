@@ -214,6 +214,7 @@ try
                 w_avg_speed = (vel1*veh1 + vel2*veh2 + vel3*veh3 + veh4*vel4 + veh5*vel5)/total_veh;
                 %w_avg_speed = (vel1 * veh1 + vel2 * veh2 + vel3 * veh3)/total_veh;
             end
+            total_veh = total_veh/5;
             sensor_sum(i).id = sensor_main(i).id;
             sensor_sum(i).latitude(k) = sensor_main(i).latitude(j);
             sensor_sum(i).longitude(k) = sensor_main(i).longitude(j);

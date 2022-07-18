@@ -30,7 +30,7 @@ addpath(p);
 % the folder: >fnc>data_reader>traffic_data
 
 % plot the data obtained graphs
-opt_DATEX.display = 0;
+opt_DATEX.display = 1;
 
 opt_DATEX.path = 'C:\A_Tesi\CTMs-identification\fnc\data_reader\extracted_data';
 %opt_DATEX.path = 'C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/data_reader/extracted_data/';
@@ -52,7 +52,7 @@ data = csv_DATEX_reader_v4('A2-southbound-station','data_structure4_v2',opt_DATE
 
 % plot the figures realtive to the CTM identification, mainly the
 % fundamental diagram
-opt_identification.disp = 0;
+opt_identification.disp = 1;
 
 opt_identification.tolerance = 500;
 
@@ -75,26 +75,28 @@ opt_identification.coeff_quantile = [0.90 0.90 0.90 0.90 0.90 0.90 0.90...
 [CTM_param,phi_1] = CTM_identification(data,opt_identification);
 
 %% write output data
-ID=linspace(1,CTM_param.N,CTM_param.N).';
-L=CTM_param.len;
-v=CTM_param.v_bar;
-w=CTM_param.w;
-q_max=CTM_param.q_max;
-rho_max=CTM_param.rho_max;
-T = table(ID,L,v,w,q_max,rho_max);
-writetable(T, "CTM_param_out.xls", 'Sheet',1);
-
-phi_1=table(phi_1.');
-
-d=0:seconds(10):hours(24);
-d=d(2:end);
-phi_smooth=table2timetable(phi_1, 'RowTimes',d');
-phi_smooth = smoothdata(phi_smooth,"sgolay","SmoothingFactor",0.15,"Degree",4);
-phi_smooth = timetable2table(phi_smooth);
-phi_smooth=phi_smooth(:,"Var1");
-
-writetable(phi_1, "CTM_param_out.xls", 'Sheet',2, 'WriteVariableNames', false);
-writetable(phi_smooth, "CTM_param_out.xls", 'Sheet',3, 'WriteVariableNames', false);
+% ID=linspace(1,CTM_param.N,CTM_param.N).';
+% L=round(CTM_param.len, 2);
+% v=round(CTM_param.v_bar);
+% w=round(CTM_param.w);
+% q_max=round(CTM_param.q_max);
+% rho_max=round(CTM_param.rho_max);
+% T = table(ID,L,v,w,q_max,rho_max);
+% writetable(T, "CTM_param_out.xls", 'Sheet',1);
+% 
+% phi_1=round(phi_1*1.5);
+% phi_1=table(phi_1.');
+% 
+% d=0:seconds(10):hours(24);
+% d=d(2:end);
+% phi_smooth=table2timetable(phi_1, 'RowTimes',d');
+% phi_smooth = smoothdata(phi_smooth,"sgolay","SmoothingFactor",0.15,"Degree",4);
+% phi_smooth = timetable2table(phi_smooth);
+% phi_smooth=phi_smooth(:,"Var1");
+% 
+% 
+% writetable(phi_1, "CTM_param_out.xls", 'Sheet',2, 'WriteVariableNames', false);
+% writetable(phi_smooth, "CTM_param_out.xls", 'Sheet',3, 'WriteVariableNames', false);
 
 
 
