@@ -316,7 +316,6 @@ try
 
         figure(5)
         scatter(x_beta,beta)
-        h=findobj('tag','Outlier');
         hold on
         plot(f_beta, 'red')
         grid on
@@ -331,16 +330,19 @@ try
             xx = 1:length(sensor_sum(k).vehicle_number);
             % every element in xx is made into "min_freq" many in yy
             yy = 1:1/min_freq:length(sensor_sum(k).vehicle_number);
+           
             number_v = sensor_sum(k).vehicle_number;
-            interpolated_number_vv = interp1(xx,number_v,yy);
+            veh_interp = interp1(xx,number_v,yy);
             % This is  the correct one because "interpolated_number_vv"
             % is already in [veh/h] ( changed wrt v1.0 )
-            interpolated_number_vv = round(interpolated_number_vv);
+            veh_interp = [veh_interp veh_interp(end) veh_interp(end) veh_interp(end) veh_interp(end) veh_interp(end)];
+            veh_interp = round(veh_interp);
             % interpolate the velocity
             speed_v = sensor_sum(k).vehicle_speed;
-            interpolated_speed_vv = interp1(xx,speed_v,yy);
+            speed_interp = interp1(xx,speed_v,yy);
+            speed_interp=[speed_interp speed_interp(end) speed_interp(end) speed_interp(end) speed_interp(end) speed_interp(end)];
             % assign the new values
-            sensor_sum(k).vehicle_speed = interpolated_speed_vv;
+            sensor_sum(k).vehicle_speed = speed_interp;
             % extend the other fields in "sensor"
             sensor_sum(k).starting_time = repelem(sensor_sum(k).starting_time,1,min_freq);
             sensor_sum(k).ending_time = repelem(sensor_sum(k).ending_time,1,min_freq);
@@ -351,11 +353,13 @@ try
             % sample time in [h], from the site we have the data in
             % minutes hence we have to multiply 1/60 to achieve
             sensor_sum(k).sample_time = sensor_sum(k).sample_time(1)/min_freq*ones(1,length(yy))*(1/60);
+            sensor_sum(k).sample_time = [sensor_sum(k).sample_time sensor_sum(k).sample_time(end) sensor_sum(k).sample_time(end) sensor_sum(k).sample_time(end) sensor_sum(k).sample_time(end) sensor_sum(k).sample_time(end)];
             % Since the interpolated_number_vv is the number wrt to
             % hours, then we have to scale it wrt to the sample time.
             %sensor(k).vehicle_number = interpolated_number_vv;
             %sensor(k).vehicle_number = interpolated_number_vv./60;
-            sensor_sum(k).vehicle_number = interpolated_number_vv.*sensor_sum(k).sample_time;
+
+            sensor_sum(k).vehicle_number = veh_interp.*sensor_sum(k).sample_time;
         end
     end
 
@@ -363,6 +367,7 @@ try
     % we already have the flow, we just need the density
     for j = 1:length(sensors_id)
         flow = sensor_sum(j).vehicle_number./sensor_sum(j).sample_time; % [veh/h]
+        
         %flow = (sensor(j).vehicle_number./sensor(j).sample_time)./3; % [veh/h]
         density = flow./sensor_sum(j).vehicle_speed;
         sensor_sum(j).flow = flow;
