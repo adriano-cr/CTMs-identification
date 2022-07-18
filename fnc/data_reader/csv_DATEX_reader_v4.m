@@ -335,7 +335,7 @@ try
             veh_interp = interp1(xx,number_v,yy);
             % This is  the correct one because "interpolated_number_vv"
             % is already in [veh/h] ( changed wrt v1.0 )
-            veh_interp = [veh_interp veh_interp(end) veh_interp(end) veh_interp(end) veh_interp(end) veh_interp(end)];
+            veh_interp = [veh_interp veh_interp(end) veh_interp(end) veh_interp(end) veh_interp(end) veh_interp(end)]; %fare dinamico
             veh_interp = round(veh_interp);
             % interpolate the velocity
             speed_v = sensor_sum(k).vehicle_speed;
