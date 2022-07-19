@@ -21,19 +21,15 @@ function  out_structure = csv_DATEX_reader_v4(input_str,output_str,opt)
 path1 = '\traffic_data';
 addpath(genpath([pwd,path1]))
 try
-    %% Check min_freq
-    min_freq = opt.min_freq;
-    % check if the frequency id an integer or not
-    if ~mod(min_freq,1) == 0
-        error('ERROR : "min_freq" has to be an integer')
-    end
+    %% Set min_freq
+    min_freq = 6;
 
     %% Load data
     % Data obtained with the "volle" (full) structure
     filename = [input_str,'.csv'];
 
     disp('==============================')
-    fprintf('1) Use data in : %s \n',filename)
+    fprintf('1) Using data in: %s \n',filename)
     disp('==============================')
 
     % import in a cell
@@ -90,7 +86,7 @@ try
     % extract from the whole data only the ones that interest us
     % find different inde associated to the different sensors
 
-    fprintf('3) Extracting usuful data... \n')
+    fprintf('3) Extracting useful data... \n')
     sensor(length(sensors_id)) = struct(); %preallocate space for speed-up
     for j = 1:length(sensors_id)
         check_sensor = strfind(erase(extractAfter(string(data.naam_meetlocatie_mst), 8), 'ra'),sensors_id(j));
@@ -108,6 +104,7 @@ try
         sensor(j).starting_s_time = data.start_meetperiode(sensor_index);
         sensor(j).latitude = data.start_locatie_latitude(sensor_index);
         sensor(j).longitude = data.start_locatie_longitude(sensor_index);
+        sensor(j).n_lanes = str2double(data.totaal_aantal_rijstroken(sensor_index));
     end
     %% check errors due sensors failure
     % error_count = 0;
@@ -173,6 +170,7 @@ try
                 sensor_main(jj).latitude(p) =  sensor(j).latitude(i);
                 sensor_main(jj).longitude(p) = sensor(j).longitude(i);
                 sensor_main(jj).lane(p) =  sensor(j).lane(i);
+                sensor_main(jj).n_lanes(p) = sensor(j).n_lanes(i);
                 p=p+1;
                 flag2=true;
             end
@@ -214,7 +212,7 @@ try
                 w_avg_speed = (vel1*veh1 + vel2*veh2 + vel3*veh3 + veh4*vel4 + veh5*vel5)/total_veh;
                 %w_avg_speed = (vel1 * veh1 + vel2 * veh2 + vel3 * veh3)/total_veh;
             end
-            total_veh = total_veh/5;
+            total_veh = total_veh/sensor_main(i).n_lanes(j);
             sensor_sum(i).id = sensor_main(i).id;
             sensor_sum(i).latitude(k) = sensor_main(i).latitude(j);
             sensor_sum(i).longitude(k) = sensor_main(i).longitude(j);

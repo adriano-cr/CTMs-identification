@@ -192,16 +192,6 @@ for n = 1:N_cell
             grid on
         end
 end
-%% Check if the frequency 
-% the frequency has to be high enough
-% check if it is needed 
-if sum(CTM_param.T'.*CTM_param.v_bar./CTM_param.len>1)>0
-    disp('==============================')
-    disp('WARN: the frequency is too low!')
-    disp(' - this might lead to a negative desity -')
-    disp([' - to solve choose: T < ',num2str(min(CTM_param.len./CTM_param.v_bar)),' [h]   -']);
-    disp('==============================')
-end
 
 catch ME
     keyboard
