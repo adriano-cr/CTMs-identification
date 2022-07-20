@@ -81,7 +81,7 @@ try
     disp('3) Extracting useful data... ')
     sensor(length(sensors_id)) = struct(); %preallocate space for speed-up
     tic
-    parfor (j = 1:length(sensors_id), 4)
+    parfor j = 1:length(sensors_id)
         check_sensor = strfind(erase(extractAfter(string(data.naam_meetlocatie_mst), 8), 'ra'),sensors_id(j));
         sensor_index = zeros(length(check_sensor),1);
         for i = 1:length(check_sensor)
@@ -215,15 +215,15 @@ try
         end
     end
 
-
+tic
     flow_in=[];
     flow_out=[];
-    for i=1: length(sensor_sum(1).vehicle_number)
+    parfor i=1: length(sensor_sum(1).vehicle_number)
         flow_out = [flow_out (sensor_sum(index_sensor_output).vehicle_number(i) - sensor_sum(index_sensor_output-1).vehicle_number(i))];
         flow_in = [flow_in (sensor_sum(index_sensor_input).vehicle_number(i) - sensor_sum(index_sensor_input+1).vehicle_number(i))];
 
     end
-
+toc
     flow_in_clean = filloutliers(flow_in,"nearest","percentiles",[40 98]);
     flow_out_clean = filloutliers(flow_out,"nearest","percentiles",[20 85]);
 
@@ -290,14 +290,16 @@ try
     %% Interpolate the data
     % if the minimum frequency is higher than the one of the
     % data we interpolate the data to attain the desired one
-    if ~isempty(min_freq) && sensor_sum(1).sample_time(1) > 1/min_freq  
+    if ~isempty(min_freq) && sensor_sum(1).sample_time(1) > 1/min_freq
+
         for k = 1: length(sensors_id)
             xx = 1:length(sensor_sum(k).vehicle_number); 
             yy = 1:1/min_freq:length(sensor_sum(k).vehicle_number);
           
             veh_interp = interp1(xx,sensor_sum(k).vehicle_number,yy); %interpolate the veh flow
             speed_interp = interp1(xx,sensor_sum(k).vehicle_speed,yy); %interpolate the veh speed
-
+            
+            
             % sample time in [h], from the site we have the data in
             % minutes hence we have to multiply 1/60 to achieve
             sensor_sum(k).sample_time = sensor_sum(k).sample_time(1)/min_freq*ones(1,length(yy))*(1/60);
@@ -320,11 +322,13 @@ try
             sensor_sum(k).ending_time = repelem(sensor_sum(k).ending_time, 1,min_freq);
             sensor_sum(k).latitude = repelem(sensor_sum(k).latitude, 1, min_freq);
             sensor_sum(k).longitude = repelem(sensor_sum(k).longitude, 1, min_freq);
+            
+            
         end
     end
 
     %% Compute the  fundamental diagram
-    for j = 1:length(sensors_id)
+    parfor j = 1:length(sensors_id)
         flow = sensor_sum(j).vehicle_number./sensor_sum(j).sample_time; % [veh/h]
         density = flow./sensor_sum(j).vehicle_speed;
         sensor_sum(j).flow = flow;
