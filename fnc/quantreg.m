@@ -47,7 +47,7 @@ end
 if nargin<4, order=[]; end
 if nargin<5, Nboot=200; end
 
-if (tau<=0)|(tau>=1),
+if (tau<=0)||(tau>=1)
     error('the percentile (tau) must be between 0 and 1.')
 end
 

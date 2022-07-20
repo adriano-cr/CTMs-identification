@@ -34,8 +34,8 @@ addpath(p);
 % Extract the data about traffic from the file 'intensiteit-snelheid-export' stored in
 % the folder: >fnc>data_reader>traffic_data
 
-%opt_DATEX.path = 'C:\A_Tesi\CTMs-identification\fnc\data_reader\extracted_data';
-opt_DATEX.path = 'C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/data_reader/extracted_data/';
+opt_DATEX.path = 'C:\A_Tesi\CTMs-identification\fnc\data_reader\extracted_data';
+%opt_DATEX.path = 'C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/data_reader/extracted_data/';
 %opt_DATEX.path = 'H:\Il mio Drive\Tesi magistrale\CTMs-identification\fnc\data_reader\extracted_data';
 
 % Plot option for the data obtained graphs (1 to turn on, 0 to turn off)
@@ -58,7 +58,7 @@ data = csv_DATEX_reader_v4('A2-southbound-station','data_structure4_v2',opt_DATE
 % and the input flow 'phi_1'
 
 % Plot option for the identification related graphs (1 to turn on, 0 to turn off)
-opt_identification.disp = 0;
+opt_identification.disp = 1;
 
 % Tolerance for the identification of outliers in the fundamental graph
 opt_identification.tolerance = 500;
@@ -67,16 +67,16 @@ opt_identification.tolerance = 500;
 % This is to be tuned for the problem at hand by looking at the plots
 % obtained in 'csv_DATEX_reader_v4'.
 
-opt_identification.speed_th = [88 85 80 90 90 90 90 ...
-    77 77 90 90 85 80 ];
+opt_identification.speed_th = [88 85 80 85 85 83 83 ...
+                               72 73 84 82 85 80 ];
 
 
 % The threshold used in the quantile regression.
 % These are to be tuned for the particular data used.
 % The vector has to be as long as the number of cells in the CTM-s model.
 
-opt_identification.coeff_quantile = [0.90 0.90 0.90 0.90 0.90 0.90 0.90...
-    0.90 0.90 0.90 0.90 0.90 0.90 ];
+opt_identification.coeff_quantile = [0.98 0.98 0.75 0.75 0.75 0.75 0.75...
+                                     0.80 0.80 0.75 0.75 0.75 0.75 ];
 
 % Output identified data to CTM_param_out.xls (1 to turn on, 0 to turn off)
 output_data = 1;
@@ -85,7 +85,7 @@ output_data = 1;
 
 %% write output data
 if(output_data > 0)
-    fprintf('7) Saving information in CTM_param_out.xls\n')
+    fprintf('7) Saving information in CTM_param_out.xls... \n')
     ID = linspace(1,CTM_param.N,CTM_param.N).';
     L = round(CTM_param.len, 2);
     v = round(CTM_param.v_bar);
@@ -108,5 +108,5 @@ if(output_data > 0)
     writetable(phi_1, "CTM_param_out.xls", 'Sheet',2, 'WriteVariableNames', false);
     writetable(phi_smooth, "CTM_param_out.xls", 'Sheet',3, 'WriteVariableNames', false);
 end
-
+fprintf('7) ... done!\n')
 
