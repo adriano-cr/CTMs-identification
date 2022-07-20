@@ -85,7 +85,7 @@ output_data = 0;
 
 %% write output data
 if(output_data > 0)
-    fprintf('7) Saving information in CTM_param_out.xls... \n')
+    disp('8) Saving information in CTM_param_out.xls... \n')
     ID = linspace(1,CTM_param.N,CTM_param.N).';
     L = round(CTM_param.len, 2);
     v = round(CTM_param.v_bar);
@@ -108,5 +108,5 @@ if(output_data > 0)
     writetable(phi_1, "CTM_param_out.xls", 'Sheet',2, 'WriteVariableNames', false);
     writetable(phi_smooth, "CTM_param_out.xls", 'Sheet',3, 'WriteVariableNames', false);
 end
-fprintf('7) ... done!\n')
+disp('... finish!\n')
 

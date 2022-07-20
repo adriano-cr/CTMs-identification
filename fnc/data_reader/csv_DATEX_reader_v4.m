@@ -80,8 +80,7 @@ try
 
     disp('3) Extracting useful data... ')
     sensor(length(sensors_id)) = struct(); %preallocate space for speed-up
-    tic
-    parfor (j = 1:length(sensors_id), 4)
+    for j = 1:length(sensors_id)
         check_sensor = strfind(erase(extractAfter(string(data.naam_meetlocatie_mst), 8), 'ra'),sensors_id(j));
         sensor_index = zeros(length(check_sensor),1);
         for i = 1:length(check_sensor)
@@ -99,8 +98,6 @@ try
         sensor(j).longitude = data.start_locatie_longitude(sensor_index);
         sensor(j).n_lanes = str2double(data.totaal_aantal_rijstroken(sensor_index));
     end
-    toc
-
 
     %% check errors due sensors failure
     % Done manually by selecting a day in which there are no errors or
