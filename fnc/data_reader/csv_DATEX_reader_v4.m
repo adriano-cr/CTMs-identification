@@ -334,7 +334,7 @@ try
     %% Save the file and assign the output
     save_file = [opt.path, output_str,'.mat'];
     save(save_file,'sensor')
-    fprintf('7) Save the data in %s\n',save_file)
+    fprintf('7) Saving the data in %s...\n',save_file)
     disp('==============================')
     out_structure = sensor_sum;
 

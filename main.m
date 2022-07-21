@@ -34,12 +34,12 @@ addpath(p);
 % Extract the data about traffic from the file 'intensiteit-snelheid-export' stored in
 % the folder: >fnc>data_reader>traffic_data
 
-%opt_DATEX.path = 'C:\A_Tesi\CTMs-identification\fnc\data_reader\extracted_data';
+opt_DATEX.path = 'C:\A_Tesi\CTMs-identification\fnc\data_reader\extracted_data';
 %opt_DATEX.path = 'C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/data_reader/extracted_data/';
-opt_DATEX.path = 'H:\Il mio Drive\Tesi magistrale\CTMs-identification\fnc\data_reader\extracted_data';
+%opt_DATEX.path = 'H:\Il mio Drive\Tesi magistrale\CTMs-identification\fnc\data_reader\extracted_data';
 
 % Plot option for the data obtained graphs (1 to turn on, 0 to turn off)
-opt_DATEX.display = 0;
+opt_DATEX.display = 1;
 
 % The number of the lane used to enter/exit the service station.
 % e.g.: "lane3" for the rightmost lane of a 3 lanes road
@@ -81,11 +81,11 @@ opt_identification.coeff_quantile = [0.98 0.98 0.75 0.75 0.75 0.75 0.75...
 % Output identified data to CTM_param_out.xls (1 to turn on, 0 to turn off)
 output_data = 0;
 
-%[CTM_param,phi_1] = CTM_identification(data,opt_identification);
+[CTM_param,phi_1] = CTM_identification(data,opt_identification);
 
 %% write output data
 if(output_data > 0)
-    disp('8) Saving information in CTM_param_out.xls... \n')
+    disp('8) Saving information in CTM_param_out.xls...')
     ID = linspace(1,CTM_param.N,CTM_param.N).';
     L = round(CTM_param.len, 2);
     v = round(CTM_param.v_bar);
@@ -108,5 +108,5 @@ if(output_data > 0)
     writetable(phi_1, "CTM_param_out.xls", 'Sheet',2, 'WriteVariableNames', false);
     writetable(phi_smooth, "CTM_param_out.xls", 'Sheet',3, 'WriteVariableNames', false);
 end
-disp('... finish!\n')
+disp('... Finish!')
 
