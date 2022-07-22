@@ -39,7 +39,7 @@ opt_DATEX.path = 'C:\A_Tesi\CTMs-identification\fnc\data_reader\extracted_data';
 %opt_DATEX.path = 'H:\Il mio Drive\Tesi magistrale\CTMs-identification\fnc\data_reader\extracted_data';
 
 % Plot option for the data obtained graphs (1 to turn on, 0 to turn off)
-opt_DATEX.display = 1;
+opt_DATEX.display = 0;
 
 % The number of the lane used to enter/exit the service station.
 % e.g.: "lane3" for the rightmost lane of a 3 lanes road
@@ -58,7 +58,7 @@ data = csv_DATEX_reader_v4('A2-southbound-station','data_structure4_v2',opt_DATE
 % and the input flow 'phi_1'
 
 % Plot option for the identification related graphs (1 to turn on, 0 to turn off)
-opt_identification.disp = 1;
+opt_identification.disp = 0;
 
 % Tolerance for the identification of outliers in the fundamental graph
 opt_identification.tolerance = 500;
@@ -79,9 +79,9 @@ opt_identification.coeff_quantile = [0.98 0.98 0.75 0.75 0.75 0.75 0.75...
                                      0.80 0.80 0.75 0.75 0.75 0.75 ];
 
 % Output identified data to CTM_param_out.xls (1 to turn on, 0 to turn off)
-output_data = 0;
+output_data = 1;
 
-[CTM_param,phi_1] = CTM_identification(data,opt_identification);
+[CTM_param,phi_1,last_phi] = CTM_identification(data,opt_identification);
 
 %% write output data
 if(output_data > 0)
@@ -92,11 +92,16 @@ if(output_data > 0)
     w = round(CTM_param.w);
     q_max = round(CTM_param.q_max);
     rho_max = round(CTM_param.rho_max);
-    T = table(ID,L,v,w,q_max,rho_max);
-    writetable(T, "CTM_param_out.xls", 'Sheet',1);
+    t = CTM_param.T';
+    tabella = table(ID,L,v,w,q_max,rho_max,t);
+    writetable(tabella, "CTM_param_out.xls", 'Sheet',1);
+    last_phi = last_phi;
 
     phi_1=round(phi_1*1.5);
     phi_1=table(phi_1.');
+
+    last_phi=round(last_phi*1.5);
+    last_phi=table(last_phi.');
 
     d = 0:seconds(10):hours(24);
     d = d(2:end);
@@ -104,9 +109,17 @@ if(output_data > 0)
     phi_smooth = smoothdata(phi_smooth,"sgolay","SmoothingFactor",0.15,"Degree",4);
     phi_smooth = timetable2table(phi_smooth);
     phi_smooth = phi_smooth(:,"Var1");
+    
+    phi_smooth_last = table2timetable(phi_1, 'RowTimes',d');
+    phi_smooth_last = smoothdata(phi_smooth_last,"sgolay","SmoothingFactor",0.15,"Degree",4);
+    phi_smooth_last = timetable2table(phi_smooth_last);
+    phi_smooth_last = phi_smooth_last(:,"Var1");
 
-    writetable(phi_1, "CTM_param_out.xls", 'Sheet',2, 'WriteVariableNames', false);
-    writetable(phi_smooth, "CTM_param_out.xls", 'Sheet',3, 'WriteVariableNames', false);
+    %writetable(phi_1, "CTM_param_out.xls", 'Sheet',2, 'WriteVariableNames', false);
+    writetable(phi_smooth, "CTM_param_out.xls", 'Sheet',2, 'WriteVariableNames', false);
+    %writetable(last_phi, "CTM_param_out.xls", 'Sheet',4, 'WriteVariableNames', false);
+    writetable(phi_smooth_last, "CTM_param_out.xls", 'Sheet',3, 'WriteVariableNames', false);
+
 end
 disp('... Finish!')
 

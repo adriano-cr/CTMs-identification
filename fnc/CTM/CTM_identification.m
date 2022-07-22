@@ -1,4 +1,4 @@
-function [CTM_param,phi_1] = CTM_identification(data,opt)
+function [CTM_param,phi_1,last_phi] = CTM_identification(data,opt)
 %CTM_identification : identify the parameters of the CTM model from the raw
 %data extracted 
 % INPUT:    - data : the structure with all the data about the traffic and
@@ -85,6 +85,10 @@ for n = 1:N_cell
         phi_1 = flow_IN;
     end
     flow_OUT = data(n+1).flow;
+    if n == N_cell
+        last_phi = flow_OUT;
+    end
+    
     % average flow
     flow_avg = (flow_IN+flow_OUT)/2;
     
