@@ -234,7 +234,7 @@ try
     end
 
     %% delays
-    delay_value = 70;
+   
     x_flow=(linspace(0,24,length(flow_out_clean)))';
     f_in_poly = fit(x_flow,flow_in_clean','poly6');
     f_out_poly = fit(x_flow,flow_out_clean','poly6');
@@ -244,6 +244,12 @@ try
     y_f_out_fou=round(f_out_fou(x_flow),2);
     y_f_in_fou=round(f_in_fou(x_flow),2);
 
+    delay_poly=zeros(10,35);
+    delay_fou=zeros(10,35);
+    ijk=1;
+
+for k=45:80
+    delay_value = k;
     diff_in=mod(y_f_in_fou,delay_value);
     diff_out=mod(y_f_out_fou,delay_value);
 
@@ -316,9 +322,10 @@ try
         end
     end
 
-    delay_fou = time_output-time_input;
-    delay_fou = 60.*delay_fou
-
+    app = 60.*(time_output-time_input);
+    for line=1:length(app)
+        delay_fou(line,ijk) = app(line);
+    end
     coefficientValues_f_in_poly = coeffvalues(f_in_poly);
     syms f_in_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)
     f_in_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)=p1*x^6+p2*x^5+p3*x^4+p4*x^3+p5*x^2+p6*x+p7;
@@ -347,12 +354,18 @@ try
     end
 
     if(~isempty(sols_out_clean))&&(~isempty(sols_in_clean))
-        delay_poly = sols_out_clean-sols_in_clean;
-        delay_poly = 60.*delay_poly
+        app = 60.*(sols_out_clean-sols_in_clean);
+        
     else
+        app=[];
         disp("Cannot compute delay poly")
     end
+    for line=1:length(app)
+        delay_poly(line,ijk) = app(line);
+    end
 
+    ijk=ijk+1;
+end
 
     x_beta=linspace(0,24,length(beta));
     beta_outliers=excludedata(x_beta,beta,'range',[0 1]);
