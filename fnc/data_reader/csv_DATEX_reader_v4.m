@@ -234,27 +234,84 @@ try
     end
    
     if(opt.display>0)
-        x=linspace(1,24,length(flow_out_clean));
-        f_in_poly = fit(x',flow_in_clean','poly6');
-        f_out_poly = fit(x',flow_out_clean','poly6');
-        f_in_fou = fit(x',flow_in_clean','fourier5');
-        f_out_fou = fit(x',flow_out_clean','fourier5');
-        x_beta=linspace(1,24,length(beta));
+        x_flow=linspace(0,24,length(flow_out_clean));
+        f_in_poly = fit(x_flow',flow_in_clean','poly6');
+        f_out_poly = fit(x_flow',flow_out_clean','poly6');
+        f_in_fou = fit(x_flow',flow_in_clean','fourier5');
+        f_out_fou = fit(x_flow',flow_out_clean','fourier5');
+        
+        y_f_out_poly=f_out_poly(x_flow');
+        y_f_out_fou=f_out_fou(x_flow');
+        y_f_in_poly=f_in_poly(x_flow');
+        y_f_in_fou=f_in_fou(x_flow');
+        
+
+        
+        coefficientValues_f_in_poly = coeffvalues(f_in_poly);  
+        syms f_in_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)
+        f_in_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)=p1*x^6+p2*x^5+p3*x^4+p4*x^3+p5*x^2+p6*x+p7;
+        f_in_poly_sym(x) = subs(f_in_poly_sym(p1,p2,p3,p4,p5,p6,p7,x), {p1, p2, p3, p4, p5, p6, p7}, coefficientValues_f_in_poly);
+        
+        coefficientValues_f_out_poly = coeffvalues(f_out_poly);  
+        syms f_out_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)
+        f_out_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)=p1*x^6+p2*x^5+p3*x^4+p4*x^3+p5*x^2+p6*x+p7;
+        f_out_poly_sym(x) = subs(f_out_poly_sym(p1,p2,p3,p4,p5,p6,p7,x), {p1, p2, p3, p4, p5, p6, p7}, coefficientValues_f_out_poly);
+        
+        coefficientValues_f_in_fou = coeffvalues(f_in_fou); 
+        syms f_in_fou_sym(a0,a1,b1,a2,b2,a3,b3,a4,b4,a5,b5,w,x)
+        f_in_fou_sym(a0,a1,b1,a2,b2,a3,b3,a4,b4,a5,b5,w,x)=a0 + a1*cos(x*w) + b1*sin(x*w) + ...
+                    a2*cos(2*x*w) + b2*sin(2*x*w) + a3*cos(3*x*w) + b3*sin(3*x*w) + ... 
+                    a4*cos(4*x*w) + b4*sin(4*x*w) + a5*cos(5*x*w) + b5*sin(5*x*w);
+        f_in_fou_sym(x) = subs(f_in_fou_sym(a0,a1,b1,a2,b2,a3,b3,a4,b4,a5,b5,w,x), {a0,a1,b1,a2,b2,a3,b3,a4,b4,a5,b5,w}, coefficientValues_f_in_fou);
+        
+        coefficientValues_f_out_fou = coeffvalues(f_out_fou); 
+        syms f_out_fou_sym(a0,a1,b1,a2,b2,a3,b3,a4,b4,a5,b5,w,x)
+        f_out_fou_sym(a0,a1,b1,a2,b2,a3,b3,a4,b4,a5,b5,w,x)=a0 + a1*cos(x*w) + b1*sin(x*w) + ...
+                    a2*cos(2*x*w) + b2*sin(2*x*w) + a3*cos(3*x*w) + b3*sin(3*x*w) + ... 
+                    a4*cos(4*x*w) + b4*sin(4*x*w) + a5*cos(5*x*w) + b5*sin(5*x*w);
+        f_out_fou_sym(x) = subs(f_out_fou_sym(a0,a1,b1,a2,b2,a3,b3,a4,b4,a5,b5,w,x), {a0,a1,b1,a2,b2,a3,b3,a4,b4,a5,b5,w}, coefficientValues_f_out_fou);
+        
+
+        ifouri_out(x)=ifourier(f_out_fou_sym(x));
+        eqn_out =  ifouri_out(x) == 70;
+        eqn_in =  f_in_fou_sym(x) == 70;
+        
+        
+        sols_out = double(solve(eqn_out,x))
+        sols_in = double(solve(eqn_in,x))
+    
+%         sols_out_clean=[];
+%         sols_in_clean=[];
+%         for i=1:length(sols_out)
+%             if((imag(sols_out(i))==0)&&(real(sols_out(i))>=0)&&(real(sols_out(i))<=24))
+%                 sols_out_clean = [sols_out_clean real(sols_out(i))];
+%             end
+%              if((imag(sols_in(i))==0)&&(real(sols_in(i))>=0)&&(real(sols_in(i))<=24))
+%                 sols_in_clean = [sols_in_clean real(sols_in(i))];
+%             end
+%         end
+%         delay = sols_out_clean-sols_in_clean;
+%         delay = 60.*delay;
+
+
+        x_beta=linspace(0,24,length(beta));
         beta_outliers=excludedata(x_beta,beta,'range',[0 1]);
         f_beta = fit(x_beta',beta','fourier2', 'Exclude', beta_outliers);
          
         figure(1)
-        scatter(x,flow_in_clean,'x')
+        scatter(x_flow,flow_in_clean,'x')
         hold on
         plot(f_in_poly,'red')
         plot(f_in_fou, 'black')
+        xlim=[0 24];
         grid on
         legend('dati', 'polinomio', 'fourier')
         title('flow in ripulito');
 
         figure(2)
-        scatter(x,flow_out_clean,'x')
+        scatter(x_flow,flow_out_clean,'x')
         hold on
+        xlim=[0 24];
         plot(f_out_poly,'red')
         plot(f_out_fou, 'black')
         legend('dati', 'polinomio', 'fourier')
@@ -263,6 +320,7 @@ try
 
         figure(3)
         plot(f_in_poly,'red')
+        xlim=[0 24];
         grid on
         hold on
         plot(f_out_poly,'blue')
@@ -273,12 +331,14 @@ try
         plot(f_in_fou,'red')
         grid on
         hold on
+        xlim=[0 24];
         plot(f_out_fou,'blue')
         legend('flow in', 'flow out')
         title('fourier flow in vs out puliti');
 
         figure(5)
         scatter(x_beta,beta)
+        xlim=[0 24];
         hold on
         plot(f_beta, 'red')
         grid on
