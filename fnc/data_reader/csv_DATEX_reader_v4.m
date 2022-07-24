@@ -247,6 +247,7 @@ try
     delay_poly=zeros(10,36);
     delay_fou=zeros(10,36);
     plot_tmp=[];
+    plot_tmp2=[];
     ijk=1;
 
     for k=45:80
@@ -326,6 +327,7 @@ try
         app = 60.*(time_output-time_input);
         for line=1:length(app)
             delay_fou(line,ijk) = app(line);
+            plot_tmp = [plot_tmp; app(line) (time_output(line)+time_input(line))/2];
         end
         coefficientValues_f_in_poly = coeffvalues(f_in_poly);
         syms f_in_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)
@@ -364,18 +366,25 @@ try
         end
         for line=1:length(app)
             delay_poly(line,ijk) = app(line);
-            plot_tmp = [plot_tmp; app(line) (sols_out_clean+sols_in_clean)/2];
+            plot_tmp2 = [plot_tmp2; app(line) (sols_out_clean(line)+sols_in_clean(line))/2];
         end
 
         ijk=ijk+1;
     end
 
-    delay_poly_plot = [];
+    delay_fou_plot = [];
     for i=1:length(plot_tmp)
-        if(plot_tmp(i,1)*plot_tmp(i,2)*plot_tmp(i,2)>0)
-            row1 = [plot_tmp(i,3) plot_tmp(i,1)];
-            row2 = [plot_tmp(i,3) plot_tmp(i,2)];
-            delay_poly_plot = [delay_poly_plot; row1; row2];
+        if(plot_tmp(i,1)*plot_tmp(i,2)>0)
+            row = [plot_tmp(i,2) plot_tmp(i,1)];
+            delay_fou_plot = [delay_fou_plot; row];
+        end
+    end
+
+    delay_poly_plot = [];
+    for i=1:length(plot_tmp2)
+        if(plot_tmp2(i,1)*plot_tmp2(i,2)>0)
+            row = [plot_tmp2(i,2) plot_tmp2(i,1)];
+            delay_poly_plot = [delay_poly_plot; row];
         end
     end
 
