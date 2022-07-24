@@ -196,7 +196,7 @@ try
             k = k+1;
         end
     end
-    
+
     %% Estimation of CTM-s parameters
     disp('6) Reshaping and interpolating the data... ')
     id_sensor_input = opt.id_sensor_input;
@@ -345,7 +345,7 @@ try
 
         sols_out_clean=[];
         sols_in_clean=[];
-        
+
         for i=1:length(sols_out)
             if((imag(sols_out(i))==0)&&(real(sols_out(i))>=0)&&(real(sols_out(i))<=24))
                 sols_out_clean = [sols_out_clean real(sols_out(i))];
@@ -369,18 +369,20 @@ try
 
         ijk=ijk+1;
     end
-    
+
     delay_poly_plot = [];
     for i=1:length(plot_tmp)
-        row1 = [plot_tmp(i,3) plot_tmp(i,1)];
-        row2 = [plot_tmp(i,3) plot_tmp(i,2)];
-        delay_poly_plot = [delay_poly_plot; row1; row2];
+        if(plot_tmp(i,1)*plot_tmp(i,2)*plot_tmp(i,2)>0)
+            row1 = [plot_tmp(i,3) plot_tmp(i,1)];
+            row2 = [plot_tmp(i,3) plot_tmp(i,2)];
+            delay_poly_plot = [delay_poly_plot; row1; row2];
+        end
     end
 
     x_beta=linspace(0,24,length(beta));
     beta_outliers=excludedata(x_beta,beta,'range',[0 1]);
     f_beta = fit(x_beta',beta','fourier2', 'Exclude', beta_outliers);
-    
+
     %% Plots
     if(opt.display>0)
         figure(1)
