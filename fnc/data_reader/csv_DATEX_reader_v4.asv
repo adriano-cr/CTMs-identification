@@ -246,7 +246,7 @@ try
 
     delay_poly=zeros(10,36);
     delay_fou=zeros(10,36);
-    plot_tmp=[];
+    delay_poly_plot=[];
     ijk=1;
 
     for k=45:80
@@ -364,17 +364,16 @@ try
         end
         for line=1:length(app)
             delay_poly(line,ijk) = app(line);
-            plot_tmp = [plot_tmp; app(line) (sols_out_clean+sols_in_clean)/2];
+            delay_poly_plot = [delay_poly_plot; app(line) (sols_out_clean+sols_in_clean)/2];
         end
 
         ijk=ijk+1;
     end
     
-    delay_poly_plot = [];
-    for i=1:length(plot_tmp)
-        row1 = [plot_tmp(i,3) plot_tmp(i,1)];
-        row2 = [plot_tmp(i,3) plot_tmp(i,2)];
-        delay_poly_plot = [delay_poly_plot; row1; row2];
+    for i=1:length(delay_poly_plot)
+        delay_poly_plot(:,1) = [delay_poly_plot(:,1); delay_poly_plot(:,2)];
+        delay_poly_plot(:,2) = delay_poly_plot(:,3);
+        delay_poly_plot(:,3) = [];
     end
 
     x_beta=linspace(0,24,length(beta));
