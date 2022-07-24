@@ -21,21 +21,21 @@ addpath(p);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Preliminaries
-% The data on traffic flows in the netherlands are obtained from
+% The data on traffic flows in the Netherlands are obtained from
 % https://dexter.ndwcloud.nu/home
 % The user is assumed to select the the sensors and then save a .csv file.
 % This has to be saved in the folder '>fnc>data_reader>traffic_data'
-% The details on the data used in this example can be found in details in
+% The details on the data used in this example can be found in detail in
 % the papaer "Highway Traffic Control via Smart
 % e-Mobility - Part II : Case Study"
 
 
 %% 1. Data extraction
-% Extract the data about traffic from the file 'intensiteit-snelheid-export' stored in
-% the folder: >fnc>data_reader>traffic_data
+% Extract the data about traffic from the file 'intensiteit-snelheid-export' 
+% stored in the folder: >fnc>data_reader>traffic_data
 
-opt_DATEX.path = 'C:\A_Tesi\CTMs-identification\fnc\data_reader\extracted_data';
-%opt_DATEX.path = 'C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/data_reader/extracted_data/';
+%opt_DATEX.path = 'C:\A_Tesi\CTMs-identification\fnc\data_reader\extracted_data';
+opt_DATEX.path = 'C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/data_reader/extracted_data/';
 %opt_DATEX.path = 'H:\Il mio Drive\Tesi magistrale\CTMs-identification\fnc\data_reader\extracted_data';
 
 % Plot option for the data obtained graphs (1 to turn on, 0 to turn off)

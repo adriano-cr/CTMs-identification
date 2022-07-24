@@ -1,20 +1,20 @@
 function  out_structure = csv_DATEX_reader_v4(input_str,output_str,opt)
 %% csv_DATEX_reader :
-% The funciton that reads the raw traffic data file and then creates a
+% Function that reads the raw traffic data file and then creates a
 % structure as output with all the data nicely organized and ready to be
-% elaborated. It prints also some rough plots of the data if required
-% (the plot in this case are not automatically saved).
+% elaborated. It also displays some plots of the data if required
+% (the plots in this case are not automatically saved).
 %
 % INPUT :
-%       - input_str : the string that define the input file where the raw
+%       - input_str: the string that define the input file where the raw
 %       data are extracted
-%       - output_str : the name of the file in which we want to save the
+%       - output_str: the name of the file in which we want to save the
 %       strucute that we compute
-%       - opt.display {0,1} : plot or not the foundamental graphs associated
-%       to the traffic
-%        - opt.laneSS
-%        - opt.id_sensor_input
-%        - opt.id_sensor_output
+%       - opt.display {0,1}: 1 to plot the foundamental graphs associated
+%       with the traffic data, 0 to omit
+%        - opt.laneSS: name of service station lane (void for none)
+%        - opt.id_sensor_input: code of sensor before service station
+%        - opt.id_sensor_output: code of sensor after service station
 % OUTPUT :
 %       - out_structure : the final structure with all the data
 %                   The data structure is also saved in
@@ -25,7 +25,7 @@ addpath(genpath([pwd,path]))
 min_freq = 6; % Set min_freq
 try
     %% Load data
-    % Data obtained with the "volle" (full) structure
+    % Data obtained with the "volledig" (full) structure
     filename = [input_str,'.csv'];
 
     disp('==============================')
@@ -75,8 +75,8 @@ try
     end
 
     %% Extract useful data
-    % extract from the whole data only the ones that interest us
-    % find different inde associated to the different sensors
+    % extract from the whole data only the values that interest us
+    % find different indeces associated with the different sensors
 
     disp('3) Extracting useful data... ')
     sensor(length(sensors_id)) = struct(); %preallocate space for speed-up
@@ -99,11 +99,10 @@ try
         sensor(j).n_lanes = str2double(data.totaal_aantal_rijstroken(sensor_index));
     end
 
-    %% check errors due sensors failure
-    % Done manually by selecting a day in which there are no errors or
-    % sensors failure
+    %% Check for errors due to sensors failure
+    % Done manually by selecting a day with no errors or sensors failure
 
-    %% divide data for main lanes and service station lanes
+    %% Divide data between main lanes and service station lanes
     disp('4) Splitting main lanes and service station lanes... ')
     lane_ss = opt.laneSS;
     kk=1;
@@ -159,7 +158,7 @@ try
     end
 
 
-    %% join the main lanes in one single measure per time interval
+    %% Main lanes merged in one single measure per time interval
     disp('5) Joining main lanes... ')
     sensor_sum(length(sensors_id)) = struct(); %preallocate space for speed-up
     for i = 1:length(sensors_id)
@@ -197,7 +196,8 @@ try
             k = k+1;
         end
     end
-    %% calculate CTM-s parameters
+    
+    %% Estimation of CTM-s parameters
     disp('6) Reshaping and interpolating the data... ')
     id_sensor_input = opt.id_sensor_input;
     id_sensor_output = opt.id_sensor_output;
@@ -233,8 +233,8 @@ try
         end
     end
 
-    %% delays
-   
+    %% Station delta estimation
+
     x_flow=(linspace(0,24,length(flow_out_clean)))';
     f_in_poly = fit(x_flow,flow_in_clean','poly6');
     f_out_poly = fit(x_flow,flow_out_clean','poly6');
@@ -244,133 +244,145 @@ try
     y_f_out_fou=round(f_out_fou(x_flow),2);
     y_f_in_fou=round(f_in_fou(x_flow),2);
 
-    delay_poly=zeros(10,35);
-    delay_fou=zeros(10,35);
+    delay_poly=zeros(10,36);
+    delay_fou=zeros(10,36);
     ijk=1;
 
-for k=45:80
-    delay_value = k;
-    diff_in=mod(y_f_in_fou,delay_value);
-    diff_out=mod(y_f_out_fou,delay_value);
+    for k=45:80
+        delay_value = k;
+        diff_in=mod(y_f_in_fou,delay_value);
+        diff_out=mod(y_f_out_fou,delay_value);
 
-    maxval_in=max(abs(diff_in-delay_value));
-    tol=0.5;
-    idx_in=[];
-    for i=1:length(diff_in)
-        if((diff_in(i)<=maxval_in+tol)&&(diff_in(i)>=maxval_in-tol))
-            idx_in=[idx_in i];
-        end
-    end
-
-    idx_in2=[];
-    for i=1:length(idx_in)-1
-
-        if(idx_in(i)+1~=idx_in(i+1))
-            idx_in2=[idx_in2 idx_in(i)];
-        end
-        if(i==length(idx_in)-1)
-            if(idx_in2(end)+1~=idx_in(end))
-                idx_in2=[idx_in2 idx_in(end)];
+        maxval_in=max(abs(diff_in-delay_value));
+        tol=0.5;
+        idx_in=[];
+        for i=1:length(diff_in)
+            if((diff_in(i)<=maxval_in+tol)&&(diff_in(i)>=maxval_in-tol))
+                idx_in=[idx_in i];
             end
         end
-    end
 
+        idx_in2=[];
+        for i=1:length(idx_in)-1
 
-    maxval_out=max(abs(diff_out-delay_value));
-    tol=0.5;
-    idx_out=[];
-    for i=1:length(diff_in)
-        if((diff_out(i)<=maxval_out+tol)&&(diff_out(i)>=maxval_out-tol))
-            idx_out=[idx_out i];
-        end
-    end
-    idx_out2=[];
-    for i=1:length(idx_out)-1
-
-        if(idx_out(i)+1~=idx_out(i+1))
-            idx_out2=[idx_out2 idx_out(i)];
-        end
-        if(i==length(idx_out)-1)
-            if(idx_out2(end)+1~=idx_out(end))
-                idx_out2=[idx_out2 idx_out(end)];
+            if(idx_in(i)+1~=idx_in(i+1))
+                idx_in2=[idx_in2 idx_in(i)];
             end
-        end
-    end
-
-
-    time_input=[];
-    time_output=[];
-    if(length(idx_out2)<length(idx_in2))
-        for i=length(idx_out2):-1:1
-            time_output = [time_output x_flow(idx_out2(i))];
-            for j=length(idx_in2):-1:1
-                if(idx_in2(j)<idx_out2(i))
-                    time_input = [time_input x_flow(idx_in2(j))];
-                    break
+            if(i==length(idx_in)-1)
+                if(idx_in2(end)+1~=idx_in(end))
+                    idx_in2=[idx_in2 idx_in(end)];
                 end
             end
         end
-    else
-        for i=1:length(idx_in2)
-            time_input = [time_input x_flow(idx_in2(i))];
-            for j=1:length(idx_out2)
-                if(idx_out2(j)>idx_in2(i))
-                    time_output = [time_output x_flow(idx_out2(j))];
-                    break
+
+
+        maxval_out=max(abs(diff_out-delay_value));
+        tol=0.5;
+        idx_out=[];
+        for i=1:length(diff_in)
+            if((diff_out(i)<=maxval_out+tol)&&(diff_out(i)>=maxval_out-tol))
+                idx_out=[idx_out i];
+            end
+        end
+        idx_out2=[];
+        for i=1:length(idx_out)-1
+
+            if(idx_out(i)+1~=idx_out(i+1))
+                idx_out2=[idx_out2 idx_out(i)];
+            end
+            if(i==length(idx_out)-1)
+                if(idx_out2(end)+1~=idx_out(end))
+                    idx_out2=[idx_out2 idx_out(end)];
                 end
             end
         end
-    end
 
-    app = 60.*(time_output-time_input);
-    for line=1:length(app)
-        delay_fou(line,ijk) = app(line);
-    end
-    coefficientValues_f_in_poly = coeffvalues(f_in_poly);
-    syms f_in_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)
-    f_in_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)=p1*x^6+p2*x^5+p3*x^4+p4*x^3+p5*x^2+p6*x+p7;
-    f_in_poly_sym(x) = subs(f_in_poly_sym(p1,p2,p3,p4,p5,p6,p7,x), {p1, p2, p3, p4, p5, p6, p7}, coefficientValues_f_in_poly);
 
-    coefficientValues_f_out_poly = coeffvalues(f_out_poly);
-    syms f_out_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)
-    f_out_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)=p1*x^6+p2*x^5+p3*x^4+p4*x^3+p5*x^2+p6*x+p7;
-    f_out_poly_sym(x) = subs(f_out_poly_sym(p1,p2,p3,p4,p5,p6,p7,x), {p1, p2, p3, p4, p5, p6, p7}, coefficientValues_f_out_poly);
-
-    eqn_out =  f_out_poly_sym(x) == delay_value;
-    eqn_in =  f_in_poly_sym(x) == delay_value;
-
-    sols_out = double(solve(eqn_out,x));
-    sols_in = double(solve(eqn_in,x));
-
-    sols_out_clean=[];
-    sols_in_clean=[];
-    for i=1:length(sols_out)
-        if((imag(sols_out(i))==0)&&(real(sols_out(i))>=0)&&(real(sols_out(i))<=24))
-            sols_out_clean = [sols_out_clean real(sols_out(i))];
+        time_input=[];
+        time_output=[];
+        if(length(idx_out2)<length(idx_in2))
+            for i=length(idx_out2):-1:1
+                time_output = [time_output x_flow(idx_out2(i))];
+                for j=length(idx_in2):-1:1
+                    if(idx_in2(j)<idx_out2(i))
+                        time_input = [time_input x_flow(idx_in2(j))];
+                        break
+                    end
+                end
+            end
+        else
+            for i=1:length(idx_in2)
+                time_input = [time_input x_flow(idx_in2(i))];
+                for j=1:length(idx_out2)
+                    if(idx_out2(j)>idx_in2(i))
+                        time_output = [time_output x_flow(idx_out2(j))];
+                        break
+                    end
+                end
+            end
         end
-        if((imag(sols_in(i))==0)&&(real(sols_in(i))>=0)&&(real(sols_in(i))<=24))
-            sols_in_clean = [sols_in_clean real(sols_in(i))];
+
+        app = 60.*(time_output-time_input);
+        for line=1:length(app)
+            delay_fou(line,ijk) = app(line);
+        end
+        coefficientValues_f_in_poly = coeffvalues(f_in_poly);
+        syms f_in_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)
+        f_in_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)=p1*x^6+p2*x^5+p3*x^4+p4*x^3+p5*x^2+p6*x+p7;
+        f_in_poly_sym(x) = subs(f_in_poly_sym(p1,p2,p3,p4,p5,p6,p7,x), {p1, p2, p3, p4, p5, p6, p7}, coefficientValues_f_in_poly);
+
+        coefficientValues_f_out_poly = coeffvalues(f_out_poly);
+        syms f_out_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)
+        f_out_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)=p1*x^6+p2*x^5+p3*x^4+p4*x^3+p5*x^2+p6*x+p7;
+        f_out_poly_sym(x) = subs(f_out_poly_sym(p1,p2,p3,p4,p5,p6,p7,x), {p1, p2, p3, p4, p5, p6, p7}, coefficientValues_f_out_poly);
+
+        eqn_out =  f_out_poly_sym(x) == delay_value;
+        eqn_in =  f_in_poly_sym(x) == delay_value;
+
+        sols_out = double(solve(eqn_out,x));
+        sols_in = double(solve(eqn_in,x));
+
+        sols_out_clean=[];
+        sols_in_clean=[];
+        for i=1:length(sols_out)
+            if((imag(sols_out(i))==0)&&(real(sols_out(i))>=0)&&(real(sols_out(i))<=24))
+                sols_out_clean = [sols_out_clean real(sols_out(i))];
+            end
+            if((imag(sols_in(i))==0)&&(real(sols_in(i))>=0)&&(real(sols_in(i))<=24))
+                sols_in_clean = [sols_in_clean real(sols_in(i))];
+            end
+        end
+
+        if(~isempty(sols_out_clean))&&(~isempty(sols_in_clean))
+            app = 60.*(sols_out_clean-sols_in_clean);
+
+        else
+            app=[];
+            fprintf("Useful solutions not available for y = %d\n", delay_value)
+        end
+        for line=1:length(app)
+            delay_poly(line,ijk) = app(line);
+        end
+
+        ijk=ijk+1;
+    end
+    
+    x_delay_poly = [];
+    y_delay_poly = [];
+
+    for i=1:size(delay_poly,2)
+        for j=1:size(delay_poly,1)
+            if delay_poly(j, i)> 0
+                y_delay_poly = [y_delay_poly delay_poly(j, i)];
+            end
         end
     end
-
-    if(~isempty(sols_out_clean))&&(~isempty(sols_in_clean))
-        app = 60.*(sols_out_clean-sols_in_clean);
-        
-    else
-        app=[];
-        disp("Cannot compute delay poly")
-    end
-    for line=1:length(app)
-        delay_poly(line,ijk) = app(line);
-    end
-
-    ijk=ijk+1;
-end
 
     x_beta=linspace(0,24,length(beta));
     beta_outliers=excludedata(x_beta,beta,'range',[0 1]);
     f_beta = fit(x_beta',beta','fourier2', 'Exclude', beta_outliers);
-    %% plots
+    
+    %% Plots
     if(opt.display>0)
         figure(1)
         scatter(x_flow',flow_in_clean,'x')
