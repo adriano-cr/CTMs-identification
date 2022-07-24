@@ -39,7 +39,7 @@ opt_DATEX.path = 'C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identificati
 %opt_DATEX.path = 'H:\Il mio Drive\Tesi magistrale\CTMs-identification\fnc\data_reader\extracted_data';
 
 % Plot option for the data obtained graphs (1 to turn on, 0 to turn off)
-opt_DATEX.display = 1;
+opt_DATEX.display = 0;
 
 % The number of the lane used to enter/exit the service station.
 % e.g.: "lane3" for the rightmost lane of a 3 lanes road
@@ -79,9 +79,9 @@ opt_identification.coeff_quantile = [0.98 0.98 0.75 0.75 0.75 0.75 0.75...
                                      0.80 0.80 0.75 0.75 0.75 0.75 ];
 
 % Output identified data to CTM_param_out.xls (1 to turn on, 0 to turn off)
-output_data = 0;
+output_data = 1;
 
-%[CTM_param,phi_1,last_phi] = CTM_identification(data,opt_identification);
+[CTM_param,phi_1,last_phi] = CTM_identification(data,opt_identification);
 
 %% write output data
 if(output_data > 0)
@@ -94,8 +94,7 @@ if(output_data > 0)
     rho_max = round(CTM_param.rho_max);
     t = CTM_param.T';
     tabella = table(ID,L,v,w,q_max,rho_max,t);
-    writetable(tabella, "CTM_param_out.xls", 'Sheet',1);
-    last_phi = last_phi;
+    writetable(tabella, "CTM_param_out.xls", 'Sheet','Cells parameters');
 
     phi_1=round(phi_1*1.5);
     phi_1=table(phi_1.');
