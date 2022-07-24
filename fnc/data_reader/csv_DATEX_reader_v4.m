@@ -387,6 +387,12 @@ try
             delay_poly_plot = [delay_poly_plot; row];
         end
     end
+    
+    [delay_fou_plot(:,1), I] = sort(delay_fou_plot(:,1));
+    delay_fou_plot(:,2) = delay_fou_plot(I,2);
+
+    [delay_poly_plot(:,1), I] = sort(delay_poly_plot(:,1));
+    delay_poly_plot(:,2) = delay_poly_plot(I,2);
 
     x_beta=linspace(0,24,length(beta));
     beta_outliers=excludedata(x_beta,beta,'range',[0 1]);
@@ -439,6 +445,16 @@ try
         plot(f_beta, 'red')
         grid on
         title('beta');
+
+        figure(6)
+        subplot(2,1,1)
+        plot(delay_fou_plot(:,1), delay_fou_plot(:,2))
+        grid on
+        title('delta estimated with Fourier model');
+        subplot(2,1,2)
+        plot(delay_poly_plot(:,1), delay_poly_plot(:,2))
+        grid on
+        title('delta estimated with poly model');
     end
     %% Interpolate the data
     % if the minimum frequency is higher than the one of the
