@@ -35,8 +35,8 @@ addpath(p);
 % stored in the folder: >fnc>data_reader>traffic_data
 
 %opt_DATEX.path = 'C:\A_Tesi\CTMs-identification\fnc\data_reader\extracted_data';
-opt_DATEX.path = 'C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/data_reader/extracted_data/';
-%opt_DATEX.path = 'H:\Il mio Drive\Tesi magistrale\CTMs-identification\fnc\data_reader\extracted_data';
+%opt_DATEX.path = 'C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/data_reader/extracted_data/';
+opt_DATEX.path = 'H:\Il mio Drive\Tesi magistrale\CTMs-identification\fnc\data_reader\extracted_data';
 
 % Plot option for the data obtained graphs (1 to turn on, 0 to turn off)
 opt_DATEX.display = 1;

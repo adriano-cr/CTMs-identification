@@ -369,7 +369,7 @@ try
         hold on
         plot(f_in_poly,'red')
         plot(f_in_fou, 'black')
-ylim([-50 300])
+        ylim=[-50 300];
         grid on
         xlabel("hour")
         ylabel("flow in")
@@ -381,7 +381,7 @@ ylim([-50 300])
         hold on
         plot(f_out_poly,'red')
         plot(f_out_fou, 'black') 
-ylim([-50 300])
+        ylim=[-50 300];
         legend('dati', 'polinomio', 'fourier')
         grid on
         xlabel("hour")
@@ -393,7 +393,6 @@ ylim([-50 300])
         grid on
         hold on
         plot(f_out_poly,'blue')
-        ylim([0 100])
         xlabel("hour")
         ylabel("flow")
         legend('flow in', 'flow out')
@@ -404,7 +403,6 @@ ylim([-50 300])
         grid on
         hold on
         plot(f_out_fou,'blue')
-        ylim([0 100])
         legend('flow in', 'flow out')
         xlabel("hour")
         ylabel("flow")
@@ -414,7 +412,6 @@ ylim([-50 300])
         scatter(x_beta,beta)
         hold on
         plot(f_beta, 'red')
-        ylim([0 1])
         grid on
         xlabel("hour")
         title('beta');
@@ -504,8 +501,6 @@ for n = 1 : N
     figure(last_fig_num+1)
     subplot(n_row,ceil((N)/n_row),n)
     bar(sensor_sum(n).vehicle_number)
-    ax = gca;
-    ax.YLim = [0,8];
     title_str1 = ['# vehicles (10s)-sens',sensor_sum(n).id];
     title(title_str1)
     grid on
@@ -524,8 +519,6 @@ for n = 1 : N
     figure(last_fig_num+3)
     subplot(n_row,ceil((N)/n_row),n)
     scatter(sensor_sum(n).density,sensor_sum(n).flow)
-    ax = gca;
-    ax.YLim = [0,2500];
     grid on
     title_str3 = ['Fundamental diagram-sens',sensor_sum(n).id];
     title(title_str3)
