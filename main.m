@@ -79,9 +79,9 @@ opt_identification.coeff_quantile = [0.98 0.98 0.75 0.75 0.75 0.75 0.75...
                                      0.80 0.80 0.75 0.75 0.75 0.75 ];
 
 % Output identified data to CTM_param_out.xls (1 to turn on, 0 to turn off)
-output_data = 0;
+output_data = 1;
 
-%[CTM_param,phi_1,last_phi] = CTM_identification(data,opt_identification);
+[CTM_param,phi_1,last_phi] = CTM_identification(data,opt_identification);
 
 %% write output data
 if(output_data > 0)
