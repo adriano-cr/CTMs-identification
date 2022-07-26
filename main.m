@@ -1,8 +1,11 @@
 clearvars
 close all
 clc
-p = genpath('fnc');
-addpath(p);
+
+reader = false;
+ctm_s = true;
+ctm = false;
+output_data = false; % Output identified data to CTM_param_out.xls
 
 %% Identification of CTM
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -30,95 +33,105 @@ addpath(p);
 % e-Mobility - Part II : Case Study"
 
 
-%% 1. Data extraction
-% Extract the data about traffic from the file 'intensiteit-snelheid-export' 
-% stored in the folder: >fnc>data_reader>traffic_data
+if(reader)
+    %% 1. Data extraction
+    % Extract the data about traffic from the file 'intensiteit-snelheid-export'
+    % stored in the folder: >fnc>data_reader>traffic_data
 
-%opt_DATEX.path = 'C:\A_Tesi\CTMs-identification\fnc\data_reader\extracted_data';
-%opt_DATEX.path = 'C:/Users/adria/Documents/Uni/LM II anno/Tesi/CTMs-identification/fnc/data_reader/extracted_data/';
-opt_DATEX.path = 'H:\Il mio Drive\Tesi magistrale\CTMs-identification\fnc\data_reader\extracted_data';
+    % Plot option for the data obtained graphs (1 to turn on, 0 to turn off)
+    opt_DATEX.display = 1;
 
-% Plot option for the data obtained graphs (1 to turn on, 0 to turn off)
-opt_DATEX.display = 1;
+    % The number of the lane used to enter/exit the service station.
+    % e.g.: "lane3" for the rightmost lane of a 3 lanes road
+    % Leave as "" if this functionality is not needed.
+    opt_DATEX.laneSS = "";
 
-% The number of the lane used to enter/exit the service station.
-% e.g.: "lane3" for the rightmost lane of a 3 lanes road
-% Leave as "" if this functionality is not needed.
-opt_DATEX.laneSS = "";
+    csv_DATEX_reader_v4('A2-southbound-station',opt_DATEX);
+    disp('Reading done!')
+    disp('==============================')
+end
 
-% The ID of the sensor right before and after the service station of a
-% stretch, e.g.: "101", "201", etc.
-opt_DATEX.id_sensor_input = "522";
-opt_DATEX.id_sensor_output = "535";
+if(ctm_s)
+    %% 2. CTMs param identification
+    % Plot option for the data obtained graphs (1 to turn on, 0 to turn off)
+    opt_CTMs.display = 1;
 
-data = csv_DATEX_reader_v4('A2-southbound-station','data_structure4_v2',opt_DATEX);
+    % The ID of the sensor right before and after the service station of a
+    % stretch, e.g.: "101", "201", etc.
+    opt_CTMs.id_sensor_input = "522";
+    opt_CTMs.id_sensor_output = "535";
 
-%% 2. CTM param identification
-% Identify the parameters of the CTM model
-% and the input flow 'phi_1'
+    CTMs_parameters(opt_CTMs);
+    disp('CTMs parameters identification done!')
+    disp('==============================')
+end
 
-% Plot option for the identification related graphs (1 to turn on, 0 to turn off)
-opt_identification.disp = 0;
+if(ctm)
+    %% 3. CTM param identification
+    % Identify the parameters of the CTM model
+    % and the input flow 'phi_1'
 
-% Tolerance for the identification of outliers in the fundamental graph
-opt_identification.tolerance = 500;
+    % Plot option for the identification related graphs (1 to turn on, 0 to turn off)
+    opt_CTM.disp = 1;
 
-% Speed threshold below which the vehicles are assumed to be into a congestion.
-% This is to be tuned for the problem at hand by looking at the plots
-% obtained in 'csv_DATEX_reader_v4'.
+    % Tolerance for the identification of outliers in the fundamental graph
+    opt_CTM.tolerance = 500;
 
-opt_identification.speed_th = [88 85 80 85 85 83 83 ...
-                               72 73 84 82 85 80 ];
+    % Speed threshold below which the vehicles are assumed to be into a congestion.
+    % This is to be tuned for the problem at hand by looking at the plots
+    % obtained in 'csv_DATEX_reader_v4'.
 
+    opt_CTM.speed_th = [88 85 80 85 85 83 83 ...
+        72 73 84 82 85 80 ];
 
-% The threshold used in the quantile regression.
-% These are to be tuned for the particular data used.
-% The vector has to be as long as the number of cells in the CTM-s model.
+    % The threshold used in the quantile regression.
+    % These are to be tuned for the particular data used.
+    % The vector has to be as long as the number of cells in the CTM-s model.
 
-opt_identification.coeff_quantile = [0.98 0.98 0.75 0.75 0.75 0.75 0.75...
-                                     0.80 0.80 0.75 0.75 0.75 0.75 ];
+    opt_CTM.coeff_quantile = [0.98 0.98 0.75 0.75 0.75 0.75 0.75...
+        0.80 0.80 0.75 0.75 0.75 0.75 ];
 
-% Output identified data to CTM_param_out.xls (1 to turn on, 0 to turn off)
-output_data = 1;
+    [CTM_param,phi_1,last_phi] = CTM_identification(opt_CTM);
+    disp('CTM parameters identification done!')
+    disp('==============================')
+    %% write output data
+    if(output_data)
+        path=strcat(pwd,'\fnc\extracted_data\CTM_param_out.xls');
+        disp('==============================')
+        fprintf('Saving information in %s ...\n',path)
+        
+        ID = linspace(1,CTM_param.N,CTM_param.N).';
+        L = round(CTM_param.len, 2);
+        v = round(CTM_param.v_bar);
+        w = round(CTM_param.w);
+        q_max = round(CTM_param.q_max);
+        rho_max = round(CTM_param.rho_max);
+        t = CTM_param.T';
+        tabella = table(ID,L,v,w,q_max,rho_max,t);
+        writetable(tabella, path, 'Sheet','Cells parameters');
 
-[CTM_param,phi_1,last_phi] = CTM_identification(data,opt_identification);
+        phi_1=round(phi_1*1.5);
+        phi_1=table(phi_1.');
 
-%% write output data
-if(output_data > 0)
-    disp('8) Saving information in CTM_param_out.xls...')
-    ID = linspace(1,CTM_param.N,CTM_param.N).';
-    L = round(CTM_param.len, 2);
-    v = round(CTM_param.v_bar);
-    w = round(CTM_param.w);
-    q_max = round(CTM_param.q_max);
-    rho_max = round(CTM_param.rho_max);
-    t = CTM_param.T';
-    tabella = table(ID,L,v,w,q_max,rho_max,t);
-    writetable(tabella, "CTM_param_out.xls", 'Sheet','Cells parameters');
+        last_phi=round(last_phi*1.5);
+        last_phi=table(last_phi.');
 
-    phi_1=round(phi_1*1.5);
-    phi_1=table(phi_1.');
+        d = 0:seconds(10):hours(24);
+        d = d(2:end);
+        phi_smooth = table2timetable(phi_1, 'RowTimes',d');
+        phi_smooth = smoothdata(phi_smooth,"sgolay","SmoothingFactor",0.15,"Degree",4);
+        phi_smooth = timetable2table(phi_smooth);
+        phi_smooth = phi_smooth(:,"Var1");
 
-    last_phi=round(last_phi*1.5);
-    last_phi=table(last_phi.');
+        phi_smooth_last = table2timetable(phi_1, 'RowTimes',d');
+        phi_smooth_last = smoothdata(phi_smooth_last,"sgolay","SmoothingFactor",0.15,"Degree",4);
+        phi_smooth_last = timetable2table(phi_smooth_last);
+        phi_smooth_last = phi_smooth_last(:,"Var1");
+  
+        writetable(phi_smooth, path, 'Sheet','First Demand Smooth', 'WriteVariableNames', false);
+        writetable(phi_smooth_last, path, 'Sheet','Last Demand Smooth', 'WriteVariableNames', false);
 
-    d = 0:seconds(10):hours(24);
-    d = d(2:end);
-    phi_smooth = table2timetable(phi_1, 'RowTimes',d');
-    phi_smooth = smoothdata(phi_smooth,"sgolay","SmoothingFactor",0.15,"Degree",4);
-    phi_smooth = timetable2table(phi_smooth);
-    phi_smooth = phi_smooth(:,"Var1");
-    
-    phi_smooth_last = table2timetable(phi_1, 'RowTimes',d');
-    phi_smooth_last = smoothdata(phi_smooth_last,"sgolay","SmoothingFactor",0.15,"Degree",4);
-    phi_smooth_last = timetable2table(phi_smooth_last);
-    phi_smooth_last = phi_smooth_last(:,"Var1");
-
-    %writetable(phi_1, "CTM_param_out.xls", 'Sheet','First Demand', 'WriteVariableNames', false);
-    writetable(phi_smooth, "CTM_param_out.xls", 'Sheet','First Demand Smooth', 'WriteVariableNames', false);
-    %writetable(last_phi, "CTM_param_out.xls", 'Sheet','Last Demand', 'WriteVariableNames', false);
-    writetable(phi_smooth_last, "CTM_param_out.xls", 'Sheet','Last Demand Smooth', 'WriteVariableNames', false);
-
+    end
 end
 disp('... Finish!')
-
+disp('==============================')

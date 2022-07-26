@@ -40,7 +40,6 @@ function [p,stats]=quantreg(x,y,tau,order,Nboot);
 %   routine is provided as is without any express or implied warranties
 %   whatsoever.
 
-
 if nargin<3
     error('Not enough input arguments.');
 end
@@ -90,9 +89,9 @@ pmean=x\y; %Start with an OLS regression
 %rho=@(r)sum(abs(r).*abs(tau-(r<0))); %better alternative from: Simeon Yurek from a comment on the matlab fileexchange. 
 rho=@(r)sum(abs(r.*(tau-(r<0))));
 
-%options = optimset('MaxFunEvals', 50000);
-%p=fminsearch(@(p)rho(y-x*p),pmean, options);
-p=fminsearch(@(p)rho(y-x*p),pmean);
+options = optimset('MaxFunEvals', 50000, 'MaxIter', 50000);
+p=fminsearch(@(p)rho(y-x*p),pmean, options);
+%p=fminsearch(@(p)rho(y-x*p),pmean);
 
 if nargout==0
     [xx,six]=sortrows(x(:,order));
@@ -108,7 +107,7 @@ if nargout>1
     yfit=x*p;
     resid=y-yfit;
     
-    stats.pboot=bootstrp(Nboot,@(bootr)fminsearch(@(p)rho(yfit+bootr-x*p),p)', resid);
+    stats.pboot=bootstrp(Nboot,@(bootr)fminsearch(@(p)rho(yfit+bootr-x*p),p,options)', resid);
     stats.pse=std(stats.pboot);
     
     qq=zeros(size(x,1),Nboot);
