@@ -18,16 +18,17 @@ function  [] = csv_DATEX_reader_v4(input_str,opt)
 %       - out_structure : the final structure with all the data
 %                   The data structure is also saved in
 %                   'fnc\data_reader\extracted_data\'output_str'.mat'
-warning('off');
+%warning('off');
 disp('==============================')
 disp('-- csv_DATEX_reader_v4 ')
 
-path=strcat(pwd,'\fnc\extracted_data\');
 
-min_freq = 6; % Set min_freq
 try
+    path=strcat(pwd,'\fnc\extracted_data\');
+    min_freq = 6; % Set min_freq
     %% Load data
     % Data obtained with the "volledig" (full) structure
+    input_str=strcat(pwd,'\fnc\data_reader\traffic_data\',input_str);
     filename = [input_str,'.csv'];
     fprintf('1) Using data in: %s \n',filename)
 
@@ -155,6 +156,7 @@ try
             flag2=false;
         end
     end
+    clear sensor data 
 
     %% Main lanes merged in one single measure per time interval
     disp('5) Joining main lanes... ')

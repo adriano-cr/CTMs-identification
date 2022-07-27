@@ -2,6 +2,9 @@ clearvars
 close all
 clc
 
+addpath(strcat(pwd,'\fnc\CTM'));
+addpath(strcat(pwd,'\fnc\data_reader'));
+
 reader = false;
 ctm_s = true;
 ctm = false;
