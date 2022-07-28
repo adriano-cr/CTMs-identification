@@ -89,154 +89,154 @@ try
         occupancy_fou = [occupancy_fou input-output];
     end
 
-%     %% Station delta estimation
-%     disp('3) Delta estimation... ')
-% 
-%     piecewise_out= ppcreate(x_flow,y_f_out_fou, 'pchip');
-%     piecewise_out= ppcreate(piecewise_out,'cut', [5.75 24]);
-%     inv_piecewise_out = ppcreate(piecewise_out,'inv');
-% 
-%     piecewise_in= ppcreate(x_flow,y_f_in_fou, 'pchip');
-%     piecewise_in= ppcreate(piecewise_in,'cut', [5.75 24]);
-%     inv_piecewise_in = ppcreate(piecewise_in,'inv');
-% 
-%     delay_poly=zeros(10,1);
-%     delay_fou=zeros(10,1);
-%     plot_tmp=[];
-%     plot_tmp2=[];
-%     ijk=1;
-% 
-%     for k=30:85
-%         %Fourier
-%         %inizialize variables
-%         x_in=[];
-%         x_out=[];
-%         time_input=[];
-%         time_output=[];
-%         [x_out,~]=inv_piecewise_out(k);
-%         [x_in,~]=inv_piecewise_in(k);
-% 
-%         if(length(x_out)>length(x_in))
-%             for i=1:length(x_in)
-%                 for j=1:length(x_out)
-%                     if(x_out(j)>x_in(i))
-%                         time_output = [time_output x_out(j)];
-%                         time_input = [time_input x_in(i)];
-%                         break
-%                     end
-%                 end
-%             end
-%         else 
-%             for i=length(x_out):-1:1
-%                 for j=length(x_in):-1:1
-%                     if(x_out(i)>x_in(j))
-%                         time_input = [time_input x_in(j)];
-%                         time_output = [time_output x_out(i)];
-%                         break
-%                     end
-%                 end
-%             end
-% 
-%         end
-%         app = 60.*(time_output-time_input);
-%         %copy delay to final matrix
-%         for line=1:length(app)
-%             delay_fou(line,ijk) = app(line);
-%             plot_tmp = [plot_tmp; app(line) (time_output(line)+time_input(line))/2];
-%         end
-% 
-%         %Polynomial
-%         %inizialize variables
-%         x_in=[];
-%         x_out=[];
-%         time_input=[];
-%         time_output=[];
-%         x_out_clean=[];
-%         x_in_clean=[];
-%         
-%         
-%         coefficientValues_f_in_poly = coeffvalues(f_in_poly);
-%         syms f_in_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)
-%         eq=p1*x^6+p2*x^5+p3*x^4+p4*x^3+p5*x^2+p6*x+p7;
-%         f_in_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)=eq;
-%         f_in_poly_sym(x) = subs(f_in_poly_sym(p1,p2,p3,p4,p5,p6,p7,x), {p1, p2, p3, p4, p5, p6, p7}, coefficientValues_f_in_poly);
-% 
-%         coefficientValues_f_out_poly = coeffvalues(f_out_poly);
-%         syms f_out_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)
-%         f_out_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)=eq;
-%         f_out_poly_sym(x) = subs(f_out_poly_sym(p1,p2,p3,p4,p5,p6,p7,x), {p1, p2, p3, p4, p5, p6, p7}, coefficientValues_f_out_poly);
-%         % solve equations to find roots
-%         x_out = double(solve(f_out_poly_sym(x) == k,x));
-%         x_in = double(solve(f_in_poly_sym(x) == k,x));
-% 
-%         % selecting only usuful roots
-%         for i=1:length(x_out)
-%             if((imag(x_out(i))==0)&&(real(x_out(i))>=0)&&(real(x_out(i))<=24))
-%                 x_out_clean = [x_out_clean real(x_out(i))];
-%             end
-%             if((imag(x_in(i))==0)&&(real(x_in(i))>=0)&&(real(x_in(i))<=24))
-%                 x_in_clean = [x_in_clean real(x_in(i))];
-%             end
-%         end
-% 
-%         if(~isempty(x_out_clean))&&(~isempty(x_in_clean))
-%             %usuful roots exist 
-%             if(length(x_out_clean)>length(x_in_clean))   
-%                 for i=1:length(x_in_clean)
-%                     for j=1:length(x_out_clean)
-%                         if(x_out_clean(j)>x_in_clean(i))
-%                             time_output = [time_output x_out_clean(j)];
-%                             time_input = [time_input x_in_clean(i)];
-%                             break
-%                         end
-%                     end
-%                 end
-%             else
-%                 for i=length(x_out_clean):-1:1
-%                     for j=length(x_in_clean):-1:1
-%                         if(x_out_clean(i)>x_in_clean(j))
-%                             time_input = [time_input x_in_clean(j)];
-%                             time_output = [time_output x_out_clean(i)];
-%                             break
-%                         end
-%                     end
-%                 end
-%             end
-%             app = 60.*(time_output-time_input);
-%         else
-%             %no usuful solutions
-%             app=[];
-%         end
-%         %copy delay to final matrix
-%         for line=1:length(app)
-%             delay_poly(line,ijk) = app(line);
-%             plot_tmp2 = [plot_tmp2; app(line) (time_output(line)+time_input(line))/2];
-%         end
-%         ijk=ijk+1; % update counter for the final matrix
-%         fprintf("\t - y = %d done\n", k)
-%     end
-% 
-%     % computations for plot - fourier
-%     delay_fou_plot = [];
-%     for i=1:length(plot_tmp)
-%         if(plot_tmp(i,1)*plot_tmp(i,2)>0)
-%             row = [plot_tmp(i,2) plot_tmp(i,1)];
-%             delay_fou_plot = [delay_fou_plot; row];
-%         end
-%     end
-%     [delay_fou_plot(:,1), I] = sort(delay_fou_plot(:,1));
-%     delay_fou_plot(:,2) = delay_fou_plot(I,2);
-% 
-%     % computations for plot - poly
-%     delay_poly_plot = [];
-%     for i=1:length(plot_tmp2)
-%         if(plot_tmp2(i,1)*plot_tmp2(i,2)>0)
-%             row = [plot_tmp2(i,2) plot_tmp2(i,1)];
-%             delay_poly_plot = [delay_poly_plot; row];
-%         end
-%     end
-%     [delay_poly_plot(:,1), I] = sort(delay_poly_plot(:,1));
-%     delay_poly_plot(:,2) = delay_poly_plot(I,2);
+    %% Station delta estimation
+    disp('3) Delta estimation... ')
+
+    piecewise_out= ppcreate(x_flow,y_f_out_fou, 'pchip');
+    piecewise_out= ppcreate(piecewise_out,'cut', [5.75 24]);
+    inv_piecewise_out = ppcreate(piecewise_out,'inv');
+
+    piecewise_in= ppcreate(x_flow,y_f_in_fou, 'pchip');
+    piecewise_in= ppcreate(piecewise_in,'cut', [5.75 24]);
+    inv_piecewise_in = ppcreate(piecewise_in,'inv');
+
+    delay_poly=zeros(10,1);
+    delay_fou=zeros(10,1);
+    plot_tmp=[];
+    plot_tmp2=[];
+    ijk=1;
+
+    for k=30:85
+        %Fourier
+        %inizialize variables
+        x_in=[];
+        x_out=[];
+        time_input=[];
+        time_output=[];
+        [x_out,~]=inv_piecewise_out(k);
+        [x_in,~]=inv_piecewise_in(k);
+
+        if(length(x_out)>length(x_in))
+            for i=1:length(x_in)
+                for j=1:length(x_out)
+                    if(x_out(j)>x_in(i))
+                        time_output = [time_output x_out(j)];
+                        time_input = [time_input x_in(i)];
+                        break
+                    end
+                end
+            end
+        else 
+            for i=length(x_out):-1:1
+                for j=length(x_in):-1:1
+                    if(x_out(i)>x_in(j))
+                        time_input = [time_input x_in(j)];
+                        time_output = [time_output x_out(i)];
+                        break
+                    end
+                end
+            end
+
+        end
+        app = 60.*(time_output-time_input);
+        %copy delay to final matrix
+        for line=1:length(app)
+            delay_fou(line,ijk) = app(line);
+            plot_tmp = [plot_tmp; app(line) (time_output(line)+time_input(line))/2];
+        end
+
+        %Polynomial
+        %inizialize variables
+        x_in=[];
+        x_out=[];
+        time_input=[];
+        time_output=[];
+        x_out_clean=[];
+        x_in_clean=[];
+        
+        
+        coefficientValues_f_in_poly = coeffvalues(f_in_poly);
+        syms f_in_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)
+        eq=p1*x^6+p2*x^5+p3*x^4+p4*x^3+p5*x^2+p6*x+p7;
+        f_in_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)=eq;
+        f_in_poly_sym(x) = subs(f_in_poly_sym(p1,p2,p3,p4,p5,p6,p7,x), {p1, p2, p3, p4, p5, p6, p7}, coefficientValues_f_in_poly);
+
+        coefficientValues_f_out_poly = coeffvalues(f_out_poly);
+        syms f_out_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)
+        f_out_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)=eq;
+        f_out_poly_sym(x) = subs(f_out_poly_sym(p1,p2,p3,p4,p5,p6,p7,x), {p1, p2, p3, p4, p5, p6, p7}, coefficientValues_f_out_poly);
+        % solve equations to find roots
+        x_out = double(solve(f_out_poly_sym(x) == k,x));
+        x_in = double(solve(f_in_poly_sym(x) == k,x));
+
+        % selecting only usuful roots
+        for i=1:length(x_out)
+            if((imag(x_out(i))==0)&&(real(x_out(i))>=0)&&(real(x_out(i))<=24))
+                x_out_clean = [x_out_clean real(x_out(i))];
+            end
+            if((imag(x_in(i))==0)&&(real(x_in(i))>=0)&&(real(x_in(i))<=24))
+                x_in_clean = [x_in_clean real(x_in(i))];
+            end
+        end
+
+        if(~isempty(x_out_clean))&&(~isempty(x_in_clean))
+            %usuful roots exist 
+            if(length(x_out_clean)>length(x_in_clean))   
+                for i=1:length(x_in_clean)
+                    for j=1:length(x_out_clean)
+                        if(x_out_clean(j)>x_in_clean(i))
+                            time_output = [time_output x_out_clean(j)];
+                            time_input = [time_input x_in_clean(i)];
+                            break
+                        end
+                    end
+                end
+            else
+                for i=length(x_out_clean):-1:1
+                    for j=length(x_in_clean):-1:1
+                        if(x_out_clean(i)>x_in_clean(j))
+                            time_input = [time_input x_in_clean(j)];
+                            time_output = [time_output x_out_clean(i)];
+                            break
+                        end
+                    end
+                end
+            end
+            app = 60.*(time_output-time_input);
+        else
+            %no usuful solutions
+            app=[];
+        end
+        %copy delay to final matrix
+        for line=1:length(app)
+            delay_poly(line,ijk) = app(line);
+            plot_tmp2 = [plot_tmp2; app(line) (time_output(line)+time_input(line))/2];
+        end
+        ijk=ijk+1; % update counter for the final matrix
+        fprintf("\t - y = %d done\n", k)
+    end
+
+    % computations for plot - fourier
+    delay_fou_plot = [];
+    for i=1:length(plot_tmp)
+        if(plot_tmp(i,1)*plot_tmp(i,2)>0)
+            row = [plot_tmp(i,2) plot_tmp(i,1)];
+            delay_fou_plot = [delay_fou_plot; row];
+        end
+    end
+    [delay_fou_plot(:,1), I] = sort(delay_fou_plot(:,1));
+    delay_fou_plot(:,2) = delay_fou_plot(I,2);
+
+    % computations for plot - poly
+    delay_poly_plot = [];
+    for i=1:length(plot_tmp2)
+        if(plot_tmp2(i,1)*plot_tmp2(i,2)>0)
+            row = [plot_tmp2(i,2) plot_tmp2(i,1)];
+            delay_poly_plot = [delay_poly_plot; row];
+        end
+    end
+    [delay_poly_plot(:,1), I] = sort(delay_poly_plot(:,1));
+    delay_poly_plot(:,2) = delay_poly_plot(I,2);
 
     %% Plots
     if(opt.display>0)
@@ -324,23 +324,23 @@ try
         ylabel("occupancy service station")
         title("Occupancy")
 
-%         figure(last_fig_num+8)
-%         subplot(2,1,1)
-%         scatter(delay_fou_plot(:,1), delay_fou_plot(:,2))
-%         hold on
-%         plot(fit(delay_fou_plot(:,1),delay_fou_plot(:,2),'poly1','Normalize','on','Robust','Bisquare'))
-%         %ylim([0 300])
-%         grid on
-%         ylabel("min")
-%         title('delta estimated with Fourier model');
-%         subplot(2,1,2)
-%         scatter(delay_poly_plot(:,1), delay_poly_plot(:,2))
-%         hold on
-%         plot(fit(delay_poly_plot(:,1),delay_poly_plot(:,2),'poly1','Normalize','on','Robust','Bisquare'))
-%         %ylim([0 300])
-%         ylabel("min")
-%         grid on
-%         title('delta estimated with poly model');
+        figure(last_fig_num+8)
+        subplot(2,1,1)
+        scatter(delay_fou_plot(:,1), delay_fou_plot(:,2))
+        hold on
+        plot(fit(delay_fou_plot(:,1),delay_fou_plot(:,2),'poly1','Normalize','on','Robust','Bisquare'))
+        %ylim([0 300])
+        grid on
+        ylabel("min")
+        title('delta estimated with Fourier model');
+        subplot(2,1,2)
+        scatter(delay_poly_plot(:,1), delay_poly_plot(:,2))
+        hold on
+        plot(fit(delay_poly_plot(:,1),delay_poly_plot(:,2),'poly1','Normalize','on','Robust','Bisquare'))
+        %ylim([0 300])
+        ylabel("min")
+        grid on
+        title('delta estimated with poly model');
         
         figure(last_fig_num+9)
         scatter(x_beta,beta)
