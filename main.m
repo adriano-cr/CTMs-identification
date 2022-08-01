@@ -2,6 +2,9 @@ clearvars
 close all
 clc
 
+delete(gcp('nocreate'))
+parpool('threads')
+
 addpath(strcat(pwd,'\fnc\CTM'));
 addpath(strcat(pwd,'\fnc\data_reader'));
 

@@ -31,7 +31,7 @@ try
 
     flow_in=[];
     flow_out=[];
-    for i=1: length(sensor_sum(1).vehicle_number)
+    parfor i=1: length(sensor_sum(1).vehicle_number)
         flow_out = [flow_out (sensor_sum(index_sensor_output).vehicle_number(i) - sensor_sum(index_sensor_output-1).vehicle_number(i))];
         flow_in = [flow_in (sensor_sum(index_sensor_input).vehicle_number(i) - sensor_sum(index_sensor_input+1).vehicle_number(i))];
     end
@@ -46,7 +46,7 @@ try
     [f_out_fou,gof] = fit(x_flow,flow_out_clean','fourier5','Robust', 'Bisquare');
 
     beta = flow_in./(sensor_sum(index_sensor_input).vehicle_number);
-    for i=1:length(beta)
+    parfor i=1:length(beta)
         if(isnan(beta(i)))
             beta(i)=-1;
         end
@@ -117,7 +117,7 @@ try
         [x_in,~]=inv_piecewise_in(k);
 
         if(length(x_out)>length(x_in))
-            for i=1:length(x_in)
+            parfor i=1:length(x_in)
                 for j=1:length(x_out)
                     if(x_out(j)>x_in(i))
                         time_output = [time_output x_out(j)];
@@ -170,7 +170,7 @@ try
         x_in = double(solve(f_in_poly_sym(x) == k,x));
 
         % selecting only usuful roots
-        for i=1:length(x_out)
+        parfor i=1:length(x_out)
             if((imag(x_out(i))==0)&&(real(x_out(i))>=0)&&(real(x_out(i))<=24))
                 x_out_clean = [x_out_clean real(x_out(i))];
             end
@@ -182,7 +182,7 @@ try
         if(~isempty(x_out_clean))&&(~isempty(x_in_clean))
             %usuful roots exist 
             if(length(x_out_clean)>length(x_in_clean))   
-                for i=1:length(x_in_clean)
+                parfor i=1:length(x_in_clean)
                     for j=1:length(x_out_clean)
                         if(x_out_clean(j)>x_in_clean(i))
                             time_output = [time_output x_out_clean(j)];
@@ -218,7 +218,7 @@ try
 
     % computations for plot - fourier
     delay_fou_plot = [];
-    for i=1:length(plot_tmp)
+    parfor i=1:length(plot_tmp)
         if(plot_tmp(i,1)*plot_tmp(i,2)>0)
             row = [plot_tmp(i,2) plot_tmp(i,1)];
             delay_fou_plot = [delay_fou_plot; row];
@@ -229,7 +229,7 @@ try
 
     % computations for plot - poly
     delay_poly_plot = [];
-    for i=1:length(plot_tmp2)
+    parfor i=1:length(plot_tmp2)
         if(plot_tmp2(i,1)*plot_tmp2(i,2)>0)
             row = [plot_tmp2(i,2) plot_tmp2(i,1)];
             delay_poly_plot = [delay_poly_plot; row];
@@ -313,7 +313,7 @@ try
         grid on
         w=24/length(occupancy_poly);
         aa=[];
-        for i=0:w:24-w
+        parfor i=0:w:24-w
             aa=[aa i];
         end
         plot(aa,occupancy_poly)
