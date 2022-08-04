@@ -94,14 +94,12 @@ try
         val = tot_cars_poly(i)+(y_f_in_poly(i) - y_f_out_poly(i))/60;
         tot_cars_poly = [tot_cars_poly val];
     end
-    tot_cars_poly = tot_cars_poly(2:end);
 
     tot_cars_fou = [0];
     for i=1:length(y_f_in_fou)
         val = tot_cars_fou(i)+(y_f_in_fou(i) - y_f_out_fou(i))/60;
         tot_cars_fou = [tot_cars_fou val];
     end
-    tot_cars_fou = tot_cars_fou(2:end);
 
     %% Station delta estimation
     disp('3) Delta estimation... ')
@@ -325,24 +323,22 @@ try
         figure(last_fig_num+5)
         plot(x_flow,tot_cars_poly)
         hold on
-        plot(fit(x_flow,tot_cars_poly','poly1'))
-        ylim([0 150])
+        plot(fit(x_flow,io_poly,'poly1'))
         legend('occupancy poly', 'fitted curve')
         grid on
         xlabel("hour")
         ylabel("occupancy service station")
-        title('Occupancy polynomial');
+        title('Oc Polynomial');
 
-        figure(last_fig_num+6) 
-        plot(x_flow,tot_cars_fou)
+        figure(last_fig_num+6)
         hold on
-        plot(fit(x_flow,tot_cars_fou','poly1'))
-        ylim([0 150])
-        legend('occupancy fourier', 'fitted curve')
         grid on
+        plot(x_flow,io_fou)
+        plot(fit(x_flow,io_fou,'poly1'))
+        legend('I/O fourier', 'fitted curve')
         xlabel("hour")
-        ylabel("occupancy service station")
-        title('Occupancy Fourier');
+        ylabel("I/O service station")
+        title('I/O Fourier');
 
         figure(last_fig_num+7)
         hold on

@@ -102,7 +102,6 @@ if(ctm)
     [CTM_param,phi_1,last_phi] = CTM_identification(opt_CTM);
     disp('CTM parameters identification done!')
     disp('==============================')
-    
     %% write output data
     if(output_data)
         path=strcat(pwd,'\fnc\extracted_data\CTM_param_out.xls');
@@ -142,6 +141,5 @@ if(ctm)
 
     end
 end
-
 disp('... Finish!')
 disp('==============================')
