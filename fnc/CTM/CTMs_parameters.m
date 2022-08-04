@@ -70,7 +70,7 @@ try
     occupancy_poly=[];
     occupancy_fou=[];
 
-    window=60; % in minutes
+    window=30; % in minutes
     for i=1:window:length(y_f_in_poly)-window+1
         input=0;
         output=0;
@@ -313,7 +313,7 @@ try
         grid on
         w=24/length(occupancy_poly);
         aa=[];
-        parfor i=0:w:24-w
+        for i=0:w:24-w
             aa=[aa i];
         end
         plot(aa,occupancy_poly)
