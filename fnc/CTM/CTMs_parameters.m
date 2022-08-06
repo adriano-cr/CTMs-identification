@@ -302,49 +302,45 @@ try
         ylabel("flow")
         title('Fourier flow in vs out clean');
 
-%         figure(last_fig_num+5)
-%         plot(x_flow,io_poly)
-%         hold on
-%         plot(fit(x_flow,io_poly,'poly1'))
-%         legend('I/O poly', 'fitted curve')
-%         grid on
-%         xlabel("hour")
-%         ylabel("I/O service station")
-%         title('I/O Polynomial');
-% 
-%         figure(last_fig_num+6)
-%         hold on
-%         grid on
-%         plot(x_flow,io_fou)
-%         plot(fit(x_flow,io_fou,'poly1'))
-%         legend('I/O fourier', 'fitted curve')
-%         xlabel("hour")
-%         ylabel("I/O service station")
-%         title('I/O Fourier');
-
         figure(last_fig_num+5)
+        plot(x_flow,io_poly)
+        hold on
+        plot(fit(x_flow,io_poly,'poly1'))
+        legend('I/O poly', 'fitted curve')
+        grid on
+        xlabel("hour")
+        ylabel("I/O service station")
+        title('I/O Polynomial');
+
+        figure(last_fig_num+6)
+        hold on
+        grid on
+        plot(x_flow,io_fou)
+        plot(fit(x_flow,io_fou,'poly1'))
+        legend('I/O fourier', 'fitted curve')
+        xlabel("hour")
+        ylabel("I/O service station")
+        title('I/O Fourier');
+
+        figure(last_fig_num+7)
         plot(x_flow,tot_cars_poly)
         hold on
-        plot(fit(x_flow,tot_cars_poly','poly1'))
-        ylim([0 150])
-        legend('occupancy poly', 'fitted curve')
         grid on
+        ylim([0 150])
         xlabel("hour")
         ylabel("occupancy service station")
         title('Occupancy polynomial');
 
-        figure(last_fig_num+6) 
+        figure(last_fig_num+8) 
         plot(x_flow,tot_cars_fou)
         hold on
-        plot(fit(x_flow,tot_cars_fou','poly1'))
-        ylim([0 150])
-        legend('occupancy fourier', 'fitted curve')
         grid on
+        ylim([0 150])
         xlabel("hour")
         ylabel("occupancy service station")
         title('Occupancy Fourier');
 
-        figure(last_fig_num+7)
+        figure(last_fig_num+9)
         hold on
         grid on
         w=24/length(occupancy_poly);
@@ -360,7 +356,7 @@ try
         ylabel("occupancy service station")
         title("Occupancy")
 
-        figure(last_fig_num+8)
+        figure(last_fig_num+10)
         subplot(2,1,1)
         scatter(delay_fou_plot(:,1), delay_fou_plot(:,2))
         hold on
@@ -378,7 +374,7 @@ try
         grid on
         title('delta estimated with poly model');
         
-        figure(last_fig_num+9)
+        figure(last_fig_num+11)
         scatter(x_beta,beta)
         hold on
         plot(f_beta, 'red')
