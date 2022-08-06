@@ -167,7 +167,7 @@ try
         end
 
         %Polynomial
-        %initialize variables
+        %inizialize variables
         x_in=[];
         x_out=[];
         time_input=[];
@@ -190,7 +190,7 @@ try
         x_out = double(solve(f_out_poly_sym(x) == k,x));
         x_in = double(solve(f_in_poly_sym(x) == k,x));
 
-        % select only useful roots
+        % selecting only usuful roots
         parfor i=1:length(x_out)
             if((imag(x_out(i))==0)&&(real(x_out(i))>=0)&&(real(x_out(i))<=24))
                 x_out_clean = [x_out_clean real(x_out(i))];
@@ -201,7 +201,7 @@ try
         end
 
         if(~isempty(x_out_clean))&&(~isempty(x_in_clean))
-            %useful roots exist 
+            %usuful roots exist 
             if(length(x_out_clean)>length(x_in_clean))   
                 parfor i=1:length(x_in_clean)
                     for j=1:length(x_out_clean)
@@ -225,7 +225,7 @@ try
             end
             app = 60.*(time_output-time_input);
         else
-            %no useful solutions
+            %no usuful solutions
             app=[];
         end
         %copy delay to final matrix

@@ -6,13 +6,13 @@ function  [] = csv_DATEX_reader_v4(input_str,opt)
 % (the plots in this case are not automatically saved).
 %
 % INPUT :
-%       - input_str: the string that define the input file where the raw
-%       data are extracted
-%       - output_str: the name of the file in which we want to save the
-%       strucute that we compute
+%       - input_str: the string that defines the input file where the raw
+%                    data are stored
+%       - output_str: the name of the file in which the computed structure
+%                    is to be saved
 %       - opt.display {0,1}: 1 to plot the foundamental graphs associated
-%       with the traffic data, 0 to omit
-%        - opt.laneSS: name of service station lane (void for none)
+%                    with the traffic data, 0 to omit
+%       - opt.laneSS: name of service station lane (void for none)
 %
 % OUTPUT :
 %       - out_structure : the final structure with all the data
@@ -26,6 +26,7 @@ disp('-- csv_DATEX_reader_v4 ')
 try
     path=strcat(pwd,'\fnc\extracted_data\');
     min_freq = 6; % Set min_freq
+    
     %% Load data
     % Data obtained with the "volledig" (full) structure
     input_str=strcat(pwd,'\fnc\data_reader\traffic_data\',input_str);
@@ -49,7 +50,7 @@ try
     disp('2) Reading data... ')
     %% Reading data: Header
     %The first row is the header, thus it is used to create the structure
-    %field
+    %fields
     header = cell_raw(1,:);
 
     % create all the fields
@@ -59,7 +60,7 @@ try
     end
 
     %% Reading data: Data rows
-    % complete all the fields with every row
+    % fill all the fields row by row
     data_field_name = fieldnames(data);
     for i = 1:numel(data_field_name)
         % get the data field
@@ -76,7 +77,7 @@ try
 
     %% Extract useful data
     % extract from the whole data only the values that interest us
-    % find different indeces associated with the different sensors
+    % find the indeces associated with the different sensors
 
     disp('3) Extracting useful data... ')
     sensor(length(sensors_id)) = struct(); %preallocate space for speed-up
@@ -98,9 +99,6 @@ try
         sensor(j).longitude = data.start_locatie_longitude(sensor_index);
         sensor(j).n_lanes = str2double(data.totaal_aantal_rijstroken(sensor_index));
     end
-
-    %% Check for errors due to sensors failure
-    % Done manually by selecting a day with no errors or sensors failure
 
     %% Divide data between main lanes and service station lanes
     disp('4) Splitting main lanes and service station lanes... ')
@@ -201,8 +199,9 @@ try
 
     %% Interpolate the data
     disp('6) Reshaping and interpolating the data... ')
-    % if the minimum frequency is higher than the one of the
-    % data we interpolate the data to attain the desired one
+    % if the minimum frequency is higher than the data sample rate, we 
+    % interpolate the data to obtain the desired frequency
+
     if ~isempty(min_freq) && sensor_sum(1).sample_time(1) > 1/min_freq
         parfor k = 1: length(sensors_id)
             xx = 1:length(sensor_sum(k).vehicle_number);
@@ -211,12 +210,13 @@ try
             veh_interp = interp1(xx,sensor_sum(k).vehicle_number,yy); %interpolate the veh flow
             speed_interp = interp1(xx,sensor_sum(k).vehicle_speed,yy); %interpolate the veh speed
 
-            % sample time in [h], from the site we have the data in
-            % minutes hence we have to multiply 1/60 to achieve
+            % sample time in [h]: from the website we get the data in 
+            % minutes, hence we need to divide by 60 to achieve the desired
+            % measure
             sensor_sum(k).sample_time = sensor_sum(k).sample_time(1)/min_freq*ones(1,length(yy))*(1/60);
 
             for i=1:min_freq-1
-                %extend the array interpolated to correctly match the dimensions
+                %extend the interpolated array to match the correct dimensions
                 veh_interp = [veh_interp veh_interp(end)];
                 speed_interp = [speed_interp speed_interp(end)];
                 sensor_sum(k).sample_time = [sensor_sum(k).sample_time sensor_sum(k).sample_time(end)];
