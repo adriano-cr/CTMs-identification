@@ -35,10 +35,10 @@ addpath(strcat(pwd,'\fnc\data_reader'));
 
 
 %% Choose desired code segments (true to execute, false to skip):
-reader = false;         % Read and extract data from file
-ctm = false;            % Identification of CTM parameters (no station)
+reader = true;         % Read and extract data from file
+ctm = true;            % Identification of CTM parameters (no station)
 ctm_s = true;           % Identification of CTM-s parameters (with station)
-output_data = false;    % Output identified data to CTM_param_out.xls
+output_data = true;    % Output identified data to CTM_param_out.xls
 
 
 if(reader)
@@ -54,7 +54,7 @@ if(reader)
     % Leave as "" if this functionality is not needed.
     opt_DATEX.laneSS = "";
 
-    csv_DATEX_reader_v4('A2-southbound-station',opt_DATEX);
+    csv_DATEX_reader_v4('A2-southbound-station-validazione-13-6',opt_DATEX);
     disp('Reading done!')
     disp('==============================')
 end
@@ -105,7 +105,7 @@ if(ctm)
     
     %% write output data
     if(output_data)
-        path=strcat(pwd,'\fnc\extracted_data\CTM_param_out.xls');
+        path=strcat(pwd,'\fnc\extracted_data\CTM_param_out_validazione.xls');
         disp('==============================')
         fprintf('Saving information in %s ...\n',path)
         
