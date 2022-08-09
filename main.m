@@ -38,8 +38,8 @@ addpath(strcat(pwd,'\fnc\data_reader'));
 reader = true;         % Read and extract data from file
 ctm = true;            % Identification of CTM parameters (no station)
 ctm_s = true;           % Identification of CTM-s parameters (with station)
-output_data = true;    % Output identified data to CTM_param_out.xls
-
+output_ctm = true;     % Output CTM data to CTM_param_out.xls
+output_ctms = true;     % Output station data to CTM_param_out.xls
 
 if(reader)
     %% 1. Data extraction
@@ -47,14 +47,14 @@ if(reader)
     % stored in the folder: >fnc>data_reader>traffic_data
 
     % Plot option for the data obtained graphs (1 to turn on, 0 to turn off)
-    opt_DATEX.display = 1;
+    opt_DATEX.display = 0;
 
     % The number of the lane used to enter/exit the service station.
     % e.g.: "lane3" for the rightmost lane of a 3 lanes road
     % Leave as "" if this functionality is not needed.
     opt_DATEX.laneSS = "";
 
-    csv_DATEX_reader_v4('A2-southbound-station-validazione-13-6',opt_DATEX);
+    csv_DATEX_reader_v4('A2-southbound-station',opt_DATEX);
     disp('Reading done!')
     disp('==============================')
 end
@@ -62,14 +62,14 @@ end
 if(ctm_s)
     %% 2. CTMs param identification
     % Plot option for the data obtained graphs (1 to turn on, 0 to turn off)
-    opt_CTMs.display = 1;
+    opt_CTMs.display = 0;
 
     % The ID of the sensor right before and after the service station of a
     % stretch, e.g.: "101", "201", etc.
     opt_CTMs.id_sensor_input = "522";
     opt_CTMs.id_sensor_output = "535";
 
-    CTMs_parameters(opt_CTMs);
+    station_params = CTMs_parameters(opt_CTMs);
     disp('CTM-s parameters identification done!')
     disp('==============================')
 end
@@ -93,7 +93,7 @@ if(ctm)
         72 73 84 82 85 80 ];
 
     % The threshold used in the quantile regression, to be tuned for the
-    % specific data in use. The vector must have as many elements as the 
+    % specific data in use. The vector must have as many elements as the
     % number of cells in the CTM-s model.
 
     opt_CTM.coeff_quantile = [0.98 0.98 0.75 0.75 0.75 0.75 0.75...
@@ -102,13 +102,13 @@ if(ctm)
     [CTM_param,phi_1,last_phi] = CTM_identification(opt_CTM);
     disp('CTM parameters identification done!')
     disp('==============================')
-    
+
     %% write output data
-    if(output_data)
-        path=strcat(pwd,'\fnc\extracted_data\CTM_param_out_validazione.xls');
+    path=strcat(pwd,'\fnc\extracted_data\CTM_param_out.xls');
+    if(output_ctm)
         disp('==============================')
-        fprintf('Saving information in %s ...\n',path)
-        
+        fprintf('Saving CTM information in %s ...\n',path)
+
         ID = linspace(1,CTM_param.N,CTM_param.N).';
         L = round(CTM_param.len, 2);
         v = round(CTM_param.v_bar);
@@ -116,8 +116,8 @@ if(ctm)
         q_max = round(CTM_param.q_max);
         rho_max = round(CTM_param.rho_max);
         t = CTM_param.T';
-        tabella = table(ID,L,v,w,q_max,rho_max,t);
-        writetable(tabella, path, 'Sheet','Cells parameters');
+        tab = table(ID,L,v,w,q_max,rho_max,t);
+        writetable(tab, path, 'Sheet','Cells parameters');
 
         phi_1=round(phi_1*1.5);
         phi_1=table(phi_1.');
@@ -136,11 +136,28 @@ if(ctm)
         phi_smooth_last = smoothdata(phi_smooth_last,"sgolay","SmoothingFactor",0.15,"Degree",4);
         phi_smooth_last = timetable2table(phi_smooth_last);
         phi_smooth_last = phi_smooth_last(:,"Var1");
-  
+
         writetable(phi_smooth, path, 'Sheet','First Demand Smooth', 'WriteVariableNames', false);
         writetable(phi_smooth_last, path, 'Sheet','Last Demand Smooth', 'WriteVariableNames', false);
-
     end
+    
+    if(output_ctms)
+        disp('==============================')
+        fprintf('Saving station information in %s ...\n',path)
+
+        beta = station_params.beta_avg;
+        delta = station_params.delta_avg;
+        occ = station_params.occupancy;
+        s_s = station_params.flow_in;
+        r_s = station_params.flow_out;
+
+        tab = table(beta, delta);
+        writetable(tab, path, 'Sheet','Station parameters');
+
+        writetable(table(occ), path, 'Sheet','Occupancy station', 'WriteVariableNames', false);
+        writetable(table(s_s), path, 'Sheet','Flow in station', 'WriteVariableNames', false);
+        writetable(table(r_s), path, 'Sheet','Flow out station', 'WriteVariableNames', false);
+    end   
 end
 
 disp('... Finish!')

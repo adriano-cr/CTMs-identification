@@ -1,4 +1,4 @@
-function [] = CTMs_parameters(opt)
+function station_params = CTMs_parameters(opt)
 %% CTMs_parameters : 
 % Function that identifies the parameters of the service station part of 
 % the CTM-s model from the raw extracted data, and stores the output in an 
@@ -11,6 +11,14 @@ function [] = CTMs_parameters(opt)
 %                            before the service station
 %           - opt.id_sensor_output: ID of the sensor of the cell right
 %                            after the service station
+% OUTPUT:   - station_params.beta_avg: average of the estimated turning
+%                            percentage of the station
+%           - station_params.delta_avg: average of the estimated delay
+%                            percentage of the station
+%           - station_params.flow_in: vector of values of the input flow of
+%                            the station
+%           - station_params.flow_out: vector of values of the output flow 
+%                            of the station                       
 
 disp('==============================')
 disp('-- CTMs parameters identification ')
@@ -259,6 +267,13 @@ try
     [delay_poly_plot(:,1), I] = sort(delay_poly_plot(:,1));
     delay_poly_plot(:,2) = delay_poly_plot(I,2);
 
+    %% Build output stucture
+    station_params.beta_avg = mean(f_beta(x_beta));
+    station_params.delta_avg = mean(delay_fou_plot(:,2));
+    station_params.occupancy = tot_cars_fou';
+    station_params.flow_in = y_f_in_fou();
+    station_params.flow_out = y_f_out_fou();
+
     %% Plots
     if(opt.display>0)
         last_fig_num = get(gcf,'Number');
@@ -317,11 +332,11 @@ try
         plot(x_flow,io_poly)
         hold on
         plot(fit(x_flow,io_poly,'poly1'))
-        legend('I/O poly', 'fitted curve')
+        legend('flow poly', 'fitted curve')
         grid on
         xlabel("hour")
-        ylabel("I/O service station")
-        title('I/O Polynomial');
+        ylabel("flow service station")
+        title('Station flow polynomial');
 
         % % % % % % % %
         figure(last_fig_num+6)
@@ -329,10 +344,10 @@ try
         grid on
         plot(x_flow,io_fou)
         plot(fit(x_flow,io_fou,'poly1'))
-        legend('I/O fourier', 'fitted curve')
+        legend('flow fourier', 'fitted curve')
         xlabel("hour")
-        ylabel("I/O service station")
-        title('I/O Fourier');
+        ylabel("flow service station")
+        title('Station flow Fourier');
 
         % % % % % % % %
         figure(last_fig_num+7)
@@ -369,7 +384,7 @@ try
         xticks(aa)
         xlabel("hour")
         ylabel("occupancy service station")
-        title("Occupancy")
+        title("Occupancy (w/ time window)")
 
         % % % % % % % %
         figure(last_fig_num+10)

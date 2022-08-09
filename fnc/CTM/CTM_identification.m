@@ -35,7 +35,7 @@ try
     % speed threshold
     speed_th = opt.speed_th;
 
-    %% Initialize the CT_param structure
+    %% Initialize the CTM_param structure
     CTM_param.v_bar = zeros(N_cell,1);
     CTM_param.w = zeros(N_cell,1);
     CTM_param.q_max = zeros(N_cell,1);
