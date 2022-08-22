@@ -80,7 +80,7 @@ if(ctm)
     % and the input flow 'phi_1'
 
     % Plot option for the identification related graphs (1 to turn on, 0 to turn off)
-    opt_CTM.disp = 1;
+    opt_CTM.disp = 0;
 
     % Tolerance for the identification of outliers in the fundamental graph
     opt_CTM.tolerance = 500;
@@ -104,7 +104,7 @@ if(ctm)
     disp('==============================')
 
     %% write output data
-    path=strcat(pwd,'\fnc\extracted_data\CTM_param_out.xls');
+    path=strcat(pwd,'\fnc\extracted_data\CTM_param_out_nice.xls');
     if(output_ctm)
         disp('==============================')
         fprintf('Saving CTM information in %s ...\n',path)
@@ -118,6 +118,8 @@ if(ctm)
         t = CTM_param.T';
         tab = table(ID,L,v,w,q_max,rho_max,t);
         writetable(tab, path, 'Sheet','Cells parameters');
+        writematrix(phi_1', path, 'Sheet','First Demand Real');
+        writematrix(last_phi', path, 'Sheet','Last Demand Real');
 
         phi_1=round(phi_1*1.5);
         phi_1=table(phi_1.');
@@ -136,11 +138,10 @@ if(ctm)
         phi_smooth_last = smoothdata(phi_smooth_last,"sgolay","SmoothingFactor",0.15,"Degree",4);
         phi_smooth_last = timetable2table(phi_smooth_last);
         phi_smooth_last = phi_smooth_last(:,"Var1");
-
         writetable(phi_smooth, path, 'Sheet','First Demand Smooth', 'WriteVariableNames', false);
         writetable(phi_smooth_last, path, 'Sheet','Last Demand Smooth', 'WriteVariableNames', false);
     end
-    
+
     if(output_ctms)
         disp('==============================')
         fprintf('Saving station information in %s ...\n',path)
@@ -157,7 +158,7 @@ if(ctm)
         writetable(table(occ), path, 'Sheet','Occupancy station', 'WriteVariableNames', false);
         writetable(table(s_s), path, 'Sheet','Flow in station', 'WriteVariableNames', false);
         writetable(table(r_s), path, 'Sheet','Flow out station', 'WriteVariableNames', false);
-    end   
+    end
 end
 
 disp('... Finish!')
