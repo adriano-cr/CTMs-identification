@@ -202,29 +202,8 @@ try
     % %% Nice plot
     % % Fundamental diagram sensor 1
     % %
-    % f1 = figure;
-    % scatter(density_green',flow_green',[],'g','filled')
-    % hold on
-    % grid on
-    % scatter(density_red,flow_red,[],'r','filled')
-    % plot([0,max(density)],...
-    %         [CTM_param.q_max(1),CTM_param.q_max(1)],'c','LineWidth',3)
-    % plot(density_green,p_green,'y','LineWidth',3)
-    % plot(density_red,p_red,'b','LineWidth',3)
-    % f1.WindowState = 'maximized';
-    % ax = gca();
-    % font_sz = 25;
-    % ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
-    % ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
-    % ax.XAxis.Label.String = '$\rho_1$'; ax.XAxis.Label.FontSize = font_sz;
-    % ax.XAxis.Label.Interpreter = 'latex';
-    % ax.YAxis.Label.String = '$\phi_1$'; ax.YAxis.Label.FontSize = font_sz;
-    % ax.YAxis.Label.Interpreter = 'latex';
-    % %exportgraphics(f1,['figure\fundamental_diagram_1.pdf'],...
-    %  %               'BackgroundColor','none');
-    % %exportgraphics(f1,['figure\fundamental_diagram_1.eps'],...
-    % %                'BackgroundColor','none');
-    %
+    
+    
     % %
     % f2 = figure;
     % xx = 1:length(vel);scatter(xx,vel,[],color,'filled')

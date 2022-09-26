@@ -1,8 +1,8 @@
 function station_params = CTMs_parameters(opt)
-%% CTMs_parameters : 
-% Function that identifies the parameters of the service station part of 
-% the CTM-s model from the raw extracted data, and stores the output in an 
-% organized structure, ready to be used. It also displays some plots of the 
+%% CTMs_parameters :
+% Function that identifies the parameters of the service station part of
+% the CTM-s model from the raw extracted data, and stores the output in an
+% organized structure, ready to be used. It also displays some plots of the
 % data if required (the plots in this case are not automatically saved).
 %
 % INPUT:    - opt.disp {0,1}: 1 to plot the foundamental graphs associated
@@ -17,8 +17,8 @@ function station_params = CTMs_parameters(opt)
 %                            percentage of the station
 %           - station_params.flow_in: vector of values of the input flow of
 %                            the station
-%           - station_params.flow_out: vector of values of the output flow 
-%                            of the station                       
+%           - station_params.flow_out: vector of values of the output flow
+%                            of the station
 
 disp('==============================')
 disp('-- CTMs parameters identification ')
@@ -29,7 +29,7 @@ try
     aa = load(path, '*');
     sensor_sum = aa.sensor_sum;
     clear aa;
-    
+
     %% Flows and beta estimation
     disp('1) Flows and beta estimation... ')
     id_sensor_input = opt.id_sensor_input;
@@ -56,9 +56,68 @@ try
 
     x_flow = (linspace(0,24,length(flow_out_clean)))';
     [f_in_poly,gof] = fit(x_flow,flow_in_clean','poly6','Robust', 'Bisquare');
+    RMSE_in_poly = gof.rmse
     [f_in_fou,gof] = fit(x_flow,flow_in_clean','fourier5','Robust', 'Bisquare');
+    RMSE_in_fou = gof.rmse
     [f_out_poly,gof] = fit(x_flow,flow_out_clean','poly6','Robust', 'Bisquare');
+    RMSE_out_poly = gof.rmse
     [f_out_fou,gof] = fit(x_flow,flow_out_clean','fourier5','Robust', 'Bisquare');
+    RMSE_out_fou = gof.rmse
+
+f1 = figure;
+    scatter(x_flow,flow_in_clean',[],'filled')
+    hold on
+    grid on
+    h = plot(f_in_poly);
+    h.LineWidth = 3;
+    h.Color = "black";
+    h = plot(f_in_fou);
+    h.LineWidth = 3;
+    h.Color = "red";
+    %ylim([0 1]);
+    f1.WindowState = 'maximized';
+    ax = gca();
+    font_sz = 25;
+    hLeg = legend();
+    set(hLeg,'visible','off')
+    ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
+    ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
+    ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
+    ax.XAxis.Label.Interpreter = 'latex';
+    ax.YAxis.Label.String = '$Input flow$'; ax.YAxis.Label.FontSize = font_sz;
+    ax.YAxis.Label.Interpreter = 'latex';
+    exportgraphics(f1,['input_flow.pdf'],...
+                   'BackgroundColor','none');
+    exportgraphics(f1,['input_flow.eps'],...
+                   'BackgroundColor','none');
+
+    f2 = figure;
+    scatter(x_flow,flow_out_clean',[],'filled')
+    hold on
+    grid on
+    h = plot(f_out_poly);
+    h.LineWidth = 3;
+    h.Color = "black";
+    h = plot(f_out_fou);
+    h.LineWidth = 3;
+    h.Color = "red";
+    %ylim([0 1]);
+    f2.WindowState = 'maximized';
+    ax = gca();
+    font_sz = 25;
+    hLeg = legend();
+    set(hLeg,'visible','off')
+    ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
+    ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
+    ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
+    ax.XAxis.Label.Interpreter = 'latex';
+    ax.YAxis.Label.String = '$Output flow$'; ax.YAxis.Label.FontSize = font_sz;
+    ax.YAxis.Label.Interpreter = 'latex';
+    exportgraphics(f2,'out_flow.pdf',...
+                   'BackgroundColor','none');
+    exportgraphics(f2,'out_flow.eps',...
+                   'BackgroundColor','none');
+
 
     beta = flow_in./(sensor_sum(index_sensor_input).vehicle_number);
     parfor i=1:length(beta)
@@ -70,9 +129,55 @@ try
     x_beta=linspace(0,24,length(beta));
     beta_outliers=excludedata(x_beta,beta,'range',[0 1]);
     [f_beta,gof] = fit(x_beta',beta','poly2','Robust', 'Bisquare','Exclude', beta_outliers);
-
-
-
+    RMSE_beta = gof.rmse
+    [f_beta_with_outliers,gof] = fit(x_beta',beta','poly2','Robust', 'Bisquare');
+    RMSE_beta_outliers = gof.rmse
+    
+%     f1 = figure;
+%     scatter(x_beta',beta',[],'filled')
+%     hold on
+%     grid on
+%     h = plot(f_beta);
+%     h.LineWidth = 3;
+%     %ylim([0 1]);
+%     f1.WindowState = 'maximized';
+%     ax = gca();
+%     font_sz = 25;
+%     hLeg = legend();
+%     set(hLeg,'visible','off')
+%     ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
+%     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
+%     ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
+%     ax.XAxis.Label.Interpreter = 'latex';
+%     ax.YAxis.Label.String = '$\beta$'; ax.YAxis.Label.FontSize = font_sz;
+%     ax.YAxis.Label.Interpreter = 'latex';
+%     exportgraphics(f1,['beta.pdf'],...
+%                    'BackgroundColor','none');
+%     exportgraphics(f1,['beta.eps'],...
+%                    'BackgroundColor','none');
+% 
+%     f2 = figure;
+%     scatter(x_beta',beta',[],'filled')
+%     hold on
+%     grid on
+%     h = plot(f_beta);
+%     h.LineWidth = 3;
+%     ylim([0 1]);
+%     f2.WindowState = 'maximized';
+%     ax = gca();
+%     font_sz = 25;
+%     hLeg = legend();
+%     set(hLeg,'visible','off')
+%     ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
+%     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
+%     ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
+%     ax.XAxis.Label.Interpreter = 'latex';
+%     ax.YAxis.Label.String = '$\beta$'; ax.YAxis.Label.FontSize = font_sz;
+%     ax.YAxis.Label.Interpreter = 'latex';
+%     exportgraphics(f2,['beta_detail.pdf'],...
+%                    'BackgroundColor','none');
+%     exportgraphics(f2,['beta_detail.eps'],...
+%                    'BackgroundColor','none');
     %% Station occupancy estimation
     disp('2) Occupancy estimation... ')
     y_f_out_fou=f_out_fou(x_flow);
@@ -94,7 +199,7 @@ try
             output = output + abs(y_f_out_poly(j));
         end
         occupancy_poly = [occupancy_poly input-output];
-        
+
         input=0;
         output=0;
         for j=i:i+window-1
@@ -155,7 +260,7 @@ try
                     end
                 end
             end
-        else 
+        else
             for i=length(x_out):-1:1
                 for j=length(x_in):-1:1
                     if(x_out(i)>x_in(j))
@@ -182,8 +287,8 @@ try
         time_output=[];
         x_out_clean=[];
         x_in_clean=[];
-        
-        
+
+
         coefficientValues_f_in_poly = coeffvalues(f_in_poly);
         syms f_in_poly_sym(p1,p2,p3,p4,p5,p6,p7,x)
         eq=p1*x^6+p2*x^5+p3*x^4+p4*x^3+p5*x^2+p6*x+p7;
@@ -209,8 +314,8 @@ try
         end
 
         if(~isempty(x_out_clean))&&(~isempty(x_in_clean))
-            %useful roots exist 
-            if(length(x_out_clean)>length(x_in_clean))   
+            %useful roots exist
+            if(length(x_out_clean)>length(x_in_clean))
                 parfor i=1:length(x_in_clean)
                     for j=1:length(x_out_clean)
                         if(x_out_clean(j)>x_in_clean(i))
@@ -277,7 +382,7 @@ try
     %% Plots
     if(opt.display>0)
         last_fig_num = get(gcf,'Number');
-        
+
         figure(last_fig_num+1)
         scatter(x_flow',flow_in_clean,'x')
         hold on
@@ -360,7 +465,7 @@ try
         title('Occupancy polynomial');
 
         % % % % % % % %
-        figure(last_fig_num+8) 
+        figure(last_fig_num+8)
         plot(x_flow,tot_cars_fou)
         hold on
         grid on

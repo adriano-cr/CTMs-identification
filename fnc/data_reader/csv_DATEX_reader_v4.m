@@ -243,6 +243,24 @@ try
         sensor_sum(j).flow = flow;
         sensor_sum(j).density = density;
     end
+%     f1 = figure;
+%     scatter(sensor_sum(10).density,sensor_sum(10).vehicle_speed,[],'filled')
+%     hold on
+%     grid on
+%     f1.WindowState = 'maximized';
+%     ax = gca();
+%     font_sz = 25;
+%     ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
+%     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
+%     ax.XAxis.Label.String = '$\rho[veh/km]$'; ax.XAxis.Label.FontSize = font_sz;
+%     ax.XAxis.Label.Interpreter = 'latex';
+%     ax.YAxis.Label.String = '$speed[km/h]$'; ax.YAxis.Label.FontSize = font_sz;
+%     ax.YAxis.Label.Interpreter = 'latex';
+%     exportgraphics(f1,['density_speed.pdf'],...
+%                    'BackgroundColor','none');
+%     exportgraphics(f1,['density_speed.eps'],...
+%                    'BackgroundColor','none');
+    
     %% Plot
     if(opt.display>0)
         last_fig_num = get(gcf,'Number');

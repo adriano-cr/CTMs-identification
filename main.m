@@ -35,11 +35,11 @@ addpath(strcat(pwd,'\fnc\data_reader'));
 
 
 %% Choose desired code segments (true to execute, false to skip):
-reader = true;         % Read and extract data from file
-ctm = true;            % Identification of CTM parameters (no station)
+reader = false;         % Read and extract data from file
+ctm = false ;            % Identification of CTM parameters (no station)
 ctm_s = true;           % Identification of CTM-s parameters (with station)
-output_ctm = true;     % Output CTM data to CTM_param_out.xls
-output_ctms = true;     % Output station data to CTM_param_out.xls
+output_ctm = false;     % Output CTM data to CTM_param_out.xls
+output_ctms = false;     % Output station data to CTM_param_out.xls
 
 if(reader)
     %% 1. Data extraction
