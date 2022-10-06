@@ -189,7 +189,7 @@ P1 = P2(1:L/2+1);
 P1(2:end-1) = 2*P1(2:end-1);
 
 f = Fs*(0:(L/2))/L;
-figure(1)
+figure(99)
 plot(f,P1, "-o") 
 grid on
 title("Single-Sided Amplitude Spectrum of Flow in")
