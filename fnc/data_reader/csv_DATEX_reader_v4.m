@@ -159,29 +159,44 @@ try
     %% Main lanes merged in one single measure per time interval
     disp('5) Joining main lanes... ')
     sensor_sum(length(sensors_id)) = struct(); %preallocate space for speed-up
-    parfor i = 1:length(sensors_id)
+    for i = 1:length(sensors_id)
         k = 1;
-        for j = 1:5:length(sensor_main(i).starting_s_time)
-            veh1 = sensor_main(i).veh_number(j);
-            veh2 = sensor_main(i).veh_number(j+1);
-            veh3 = sensor_main(i).veh_number(j+2);
-            veh4 = sensor_main(i).veh_number(j+3);
-            veh5 = sensor_main(i).veh_number(j+4);
-
-            total_veh = veh1 + veh2 + veh3 + veh4 + veh5;
-            %total_veh = veh1 + veh2 + veh3;
-
-            vel1 = sensor_main(i).veh_avg_speed(j);
-            vel2 = sensor_main(i).veh_avg_speed(j+1);
-            vel3 = sensor_main(i).veh_avg_speed(j+2);
-            vel4 = sensor_main(i).veh_avg_speed(j+3);
-            vel5 = sensor_main(i).veh_avg_speed(j+4);
+        n_lanes = sensor_main(i).n_lanes(1);
+        for j = 1:n_lanes:length(sensor_main(i).starting_s_time)
+            total_veh=0;
+            for z=j:(j+n_lanes-1)
+                total_veh = total_veh + sensor_main(i).veh_number(z);
+            end
             if total_veh == 0
                 w_avg_speed = 0;
             else
-                w_avg_speed = (vel1*veh1 + vel2*veh2 + vel3*veh3 + veh4*vel4 + veh5*vel5)/total_veh;
+                total_speed = 0;
+                for z=j:(j+n_lanes-1)
+                    total_speed = total_speed + sensor_main(i).veh_number(z)*sensor_main(i).veh_avg_speed(z);
+                end
+                w_avg_speed = total_speed/total_veh;
                 %w_avg_speed = (vel1 * veh1 + vel2 * veh2 + vel3 * veh3)/total_veh;
             end
+%             veh1 = sensor_main(i).veh_number(j);
+%             veh2 = sensor_main(i).veh_number(j+1);
+%             veh3 = sensor_main(i).veh_number(j+2);
+%             veh4 = sensor_main(i).veh_number(j+3);
+%             veh5 = sensor_main(i).veh_number(j+4);
+% 
+%             total_veh = veh1 + veh2 + veh3 + veh4 + veh5;
+%             %total_veh = veh1 + veh2 + veh3;
+% 
+%             vel1 = sensor_main(i).veh_avg_speed(j);
+%             vel2 = sensor_main(i).veh_avg_speed(j+1);
+%             vel3 = sensor_main(i).veh_avg_speed(j+2);
+%             vel4 = sensor_main(i).veh_avg_speed(j+3);
+%             vel5 = sensor_main(i).veh_avg_speed(j+4);
+%             if total_veh == 0
+%                 w_avg_speed = 0;
+%             else
+%                 w_avg_speed = (vel1*veh1 + vel2*veh2 + vel3*veh3 + veh4*vel4 + veh5*vel5)/total_veh;
+%                 %w_avg_speed = (vel1 * veh1 + vel2 * veh2 + vel3 * veh3)/total_veh;
+%             end
             total_veh = total_veh/sensor_main(i).n_lanes(j);
             sensor_sum(i).id = sensor_main(i).id;
             sensor_sum(i).latitude(k) = sensor_main(i).latitude(j);
