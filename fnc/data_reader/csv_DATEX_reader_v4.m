@@ -26,7 +26,7 @@ disp('-- csv_DATEX_reader_v4 ')
 try
     path=strcat(pwd,'\fnc\extracted_data\');
     min_freq = 6; % Set min_freq
-    
+
     %% Load data
     % Data obtained with the "volledig" (full) structure
     input_str=strcat(pwd,'\fnc\data_reader\traffic_data\',input_str);
@@ -71,7 +71,7 @@ try
 
     %% Find sensor names
     sensors_raw = unique(data.naam_meetlocatie_mst);
-    parfor i = 1:length(sensors_raw)
+    for i = 1:length(sensors_raw)
         sensors_id(i) = erase(extractAfter(string(sensors_raw(i)), 8), 'ra');
     end
 
@@ -175,28 +175,7 @@ try
                     total_speed = total_speed + sensor_main(i).veh_number(z)*sensor_main(i).veh_avg_speed(z);
                 end
                 w_avg_speed = total_speed/total_veh;
-                %w_avg_speed = (vel1 * veh1 + vel2 * veh2 + vel3 * veh3)/total_veh;
             end
-%             veh1 = sensor_main(i).veh_number(j);
-%             veh2 = sensor_main(i).veh_number(j+1);
-%             veh3 = sensor_main(i).veh_number(j+2);
-%             veh4 = sensor_main(i).veh_number(j+3);
-%             veh5 = sensor_main(i).veh_number(j+4);
-% 
-%             total_veh = veh1 + veh2 + veh3 + veh4 + veh5;
-%             %total_veh = veh1 + veh2 + veh3;
-% 
-%             vel1 = sensor_main(i).veh_avg_speed(j);
-%             vel2 = sensor_main(i).veh_avg_speed(j+1);
-%             vel3 = sensor_main(i).veh_avg_speed(j+2);
-%             vel4 = sensor_main(i).veh_avg_speed(j+3);
-%             vel5 = sensor_main(i).veh_avg_speed(j+4);
-%             if total_veh == 0
-%                 w_avg_speed = 0;
-%             else
-%                 w_avg_speed = (vel1*veh1 + vel2*veh2 + vel3*veh3 + veh4*vel4 + veh5*vel5)/total_veh;
-%                 %w_avg_speed = (vel1 * veh1 + vel2 * veh2 + vel3 * veh3)/total_veh;
-%             end
             total_veh = total_veh/sensor_main(i).n_lanes(j);
             sensor_sum(i).id = sensor_main(i).id;
             sensor_sum(i).latitude(k) = sensor_main(i).latitude(j);
@@ -214,7 +193,7 @@ try
 
     %% Interpolate the data
     disp('6) Reshaping and interpolating the data... ')
-    % if the minimum frequency is higher than the data sample rate, we 
+    % if the minimum frequency is higher than the data sample rate, we
     % interpolate the data to obtain the desired frequency
 
     if ~isempty(min_freq) && sensor_sum(1).sample_time(1) > 1/min_freq
@@ -225,7 +204,7 @@ try
             veh_interp = interp1(xx,sensor_sum(k).vehicle_number,yy); %interpolate the veh flow
             speed_interp = interp1(xx,sensor_sum(k).vehicle_speed,yy); %interpolate the veh speed
 
-            % sample time in [h]: from the website we get the data in 
+            % sample time in [h]: from the website we get the data in
             % minutes, hence we need to divide by 60 to achieve the desired
             % measure
             sensor_sum(k).sample_time = sensor_sum(k).sample_time(1)/min_freq*ones(1,length(yy))*(1/60);
@@ -258,24 +237,24 @@ try
         sensor_sum(j).flow = flow;
         sensor_sum(j).density = density;
     end
-%     f1 = figure;
-%     scatter(sensor_sum(10).density,sensor_sum(10).vehicle_speed,[],'filled')
-%     hold on
-%     grid on
-%     f1.WindowState = 'maximized';
-%     ax = gca();
-%     font_sz = 25;
-%     ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
-%     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
-%     ax.XAxis.Label.String = '$\rho[veh/km]$'; ax.XAxis.Label.FontSize = font_sz;
-%     ax.XAxis.Label.Interpreter = 'latex';
-%     ax.YAxis.Label.String = '$speed[km/h]$'; ax.YAxis.Label.FontSize = font_sz;
-%     ax.YAxis.Label.Interpreter = 'latex';
-%     exportgraphics(f1,['density_speed.pdf'],...
-%                    'BackgroundColor','none');
-%     exportgraphics(f1,['density_speed.eps'],...
-%                    'BackgroundColor','none');
-    
+    %     f1 = figure;
+    %     scatter(sensor_sum(10).density,sensor_sum(10).vehicle_speed,[],'filled')
+    %     hold on
+    %     grid on
+    %     f1.WindowState = 'maximized';
+    %     ax = gca();
+    %     font_sz = 25;
+    %     ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
+    %     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
+    %     ax.XAxis.Label.String = '$\rho[veh/km]$'; ax.XAxis.Label.FontSize = font_sz;
+    %     ax.XAxis.Label.Interpreter = 'latex';
+    %     ax.YAxis.Label.String = '$speed[km/h]$'; ax.YAxis.Label.FontSize = font_sz;
+    %     ax.YAxis.Label.Interpreter = 'latex';
+    %     exportgraphics(f1,['density_speed.pdf'],...
+    %                    'BackgroundColor','none');
+    %     exportgraphics(f1,['density_speed.eps'],...
+    %                    'BackgroundColor','none');
+
     %% Plot
     if(opt.display>0)
         last_fig_num = get(gcf,'Number');
