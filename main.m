@@ -36,8 +36,8 @@ addpath(strcat(pwd,'\fnc\data_reader'));
 
 %% Choose desired code segments (true to execute, false to skip):
 reader = true;         % Read and extract data from file
-ctm = false;            % Identification of CTM parameters (no station)
-ctm_s = false;           % Identification of CTM-s parameters (with station)
+ctm = true;            % Identification of CTM parameters (no station)
+ctm_s = true;           % Identification of CTM-s parameters (with station)
 output_ctm = false;     % Output CTM data to CTM_param_out.xls
 output_ctms = false;     % Output station data to CTM_param_out.xls
 
@@ -54,7 +54,7 @@ if(reader)
     % Leave as "" if this functionality is not needed.
     opt_DATEX.laneSS = "";
 
-    csv_DATEX_reader_v4('A13-northbound-15cells',opt_DATEX);
+    csv_DATEX_reader_v4('A2-southbound-station',opt_DATEX);
     disp('Reading done!')
     disp('==============================')
 end
@@ -96,7 +96,7 @@ if(ctm)
     % specific data in use. The vector must have as many elements as the
     % number of cells in the CTM-s model.
 
-    opt_CTM.coeff_quantile = [0.98 0.5 0.99 0.98 0.75 0.75 0.75...
+    opt_CTM.coeff_quantile = [0.98 0.9 0.99 0.9 0.75 0.75 0.75...
         0.80 0.80 0.75 0.75 0.75 0.75 0.75 0.75];
 
     [CTM_param,phi_1,last_phi] = CTM_identification(opt_CTM);

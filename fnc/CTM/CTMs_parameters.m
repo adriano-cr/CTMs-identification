@@ -181,48 +181,7 @@ try
 %     exportgraphics(f2,['beta_detail.eps'],...
 %                    'BackgroundColor','none');
 
-Fs = 0.1;            % Sampling frequency                    
-L = length (flow_in);
-Y = fft(flow_in);
-P2 = abs(Y/L);
-P1 = P2(1:L/2+1);
-P1(2:end-1) = 2*P1(2:end-1);
 
-f = Fs*(0:(L/2))/L;
-figure(99)
-plot(f,P1, "-o") 
-grid on
-title("Single-Sided Amplitude Spectrum of Flow in")
-xlabel("f (Hz)")
-ylabel("|P1(f)|")
-
-Fs = 0.1;            % Sampling frequency                    
-L = length (flow_out);
-Y = fft(flow_out);
-P2 = abs(Y/L);
-P1 = P2(1:L/2+1);
-P1(2:end-1) = 2*P1(2:end-1);
-
-figure(2)
-plot(f,P1, "-o") 
-grid on
-title("Single-Sided Amplitude Spectrum of Flow out")
-xlabel("f (Hz)")
-ylabel("|P1(f)|")
-
-Fs = 0.1;            % Sampling frequency                    
-L = length (beta);
-Y = fft(beta);
-P2 = abs(Y/L);
-P1 = P2(1:L/2+1);
-P1(2:end-1) = 2*P1(2:end-1);
-
-figure(3)
-plot(f,P1, "-o") 
-grid on
-title("Single-Sided Amplitude Spectrum of Beta")
-xlabel("f (Hz)")
-ylabel("|P1(f)|")
 
 
 
@@ -617,6 +576,50 @@ ylabel("|P1(f)|")
         grid on
         xlabel("hour")
         title('beta');
+        Fs = 0.1;            % Sampling frequency                    
+
+        %%%%%%%%%%%%%%%%
+        L = length (flow_in);
+Y = fft(flow_in);
+P2 = abs(Y/L);
+P1 = P2(1:L/2+1);
+P1(2:end-1) = 2*P1(2:end-1);
+f = Fs*(0:(L/2))/L;
+
+figure(last_fig_num+12)
+plot(f,P1, "-o") 
+grid on
+title("Single-Sided Amplitude Spectrum of Flow in")
+xlabel("f (Hz)")
+ylabel("|P1(f)|")
+
+Fs = 0.1;            % Sampling frequency                    
+L = length (flow_out);
+Y = fft(flow_out);
+P2 = abs(Y/L);
+P1 = P2(1:L/2+1);
+P1(2:end-1) = 2*P1(2:end-1);
+
+figure(last_fig_num+13)
+plot(f,P1, "-o") 
+grid on
+title("Single-Sided Amplitude Spectrum of Flow out")
+xlabel("f (Hz)")
+ylabel("|P1(f)|")
+
+Fs = 0.1;            % Sampling frequency                    
+L = length (beta);
+Y = fft(beta);
+P2 = abs(Y/L);
+P1 = P2(1:L/2+1);
+P1(2:end-1) = 2*P1(2:end-1);
+
+figure(last_fig_num+14)
+plot(f,P1, "-o") 
+grid on
+title("Single-Sided Amplitude Spectrum of Beta")
+xlabel("f (Hz)")
+ylabel("|P1(f)|")
     end
 catch ME
     keyboard
