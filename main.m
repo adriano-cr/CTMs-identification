@@ -38,8 +38,8 @@ addpath(strcat(pwd,'\fnc\data_reader'));
 reader = true;         % Read and extract data from file
 ctm = true;            % Identification of CTM parameters (no station)
 ctm_s = true;           % Identification of CTM-s parameters (with station)
-output_ctm = false;     % Output CTM data to CTM_param_out.xls
-output_ctms = false;     % Output station data to CTM_param_out.xls
+output_ctm = true;     % Output CTM data to CTM_param_out.xls
+output_ctms = true;     % Output station data to CTM_param_out.xls
 
 if(reader)
     %% 1. Data extraction
@@ -54,7 +54,7 @@ if(reader)
     % Leave as "" if this functionality is not needed.
     opt_DATEX.laneSS = "";
 
-    csv_DATEX_reader_v4('A2-southbound-station',opt_DATEX);
+    csv_DATEX_reader_v4('A2-southbound-station-15cells',opt_DATEX);
     disp('Reading done!')
     disp('==============================')
 end
@@ -66,8 +66,10 @@ if(ctm_s)
 
     % The ID of the sensor right before and after the service station of a
     % stretch, e.g.: "101", "201", etc.
-    opt_CTMs.id_sensor_input = "522";
+opt_CTMs.id_sensor_input = "522";
     opt_CTMs.id_sensor_output = "535";
+
+    opt_CTMs.useSS = 0;
 
     station_params = CTMs_parameters(opt_CTMs);
     disp('CTM-s parameters identification done!')
@@ -96,15 +98,15 @@ if(ctm)
     % specific data in use. The vector must have as many elements as the
     % number of cells in the CTM-s model.
 
-    opt_CTM.coeff_quantile = [0.98 0.9 0.99 0.9 0.75 0.75 0.75...
-        0.80 0.80 0.75 0.75 0.75 0.75 0.75 0.75];
+    opt_CTM.coeff_quantile = [0.98 0.98 0.99 0.9 0.75 0.75 0.75...
+        0.80 0.80 0.75 0.75 0.75 0.75 0.90 0.90];
 
     [CTM_param,phi_1,last_phi] = CTM_identification(opt_CTM);
     disp('CTM parameters identification done!')
     disp('==============================')
 
     %% write output data
-    path=strcat(pwd,'\fnc\extracted_data\CTM_param_out_A20_3lanes.xls');
+    path=strcat(pwd,'\fnc\extracted_data\CTM_param_out_A2_15cells.xls');
     if(output_ctm)
         disp('==============================')
         fprintf('Saving CTM information in %s ...\n',path)

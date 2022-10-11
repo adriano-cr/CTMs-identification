@@ -107,12 +107,14 @@ try
     jj=1;
     flag=false;
     flag2=false;
+    flag3=false;
     for j = 1:length(sensors_id)
         k=1;
         p=1;
         for i = 1 : length(sensor(j).lane)
             app = sensor(j).lane(i);
             if(strcmp(lane_ss, app))
+                flag3=true;
                 sensor_ss(kk).id = sensor(j).id;
                 sensor_ss(kk).vehicle_number(k) = sensor(j).veh_number(i);
                 sensor_ss(kk).vehicle_speed(k) = sensor(j).veh_avg_speed(i);
@@ -155,19 +157,23 @@ try
         end
     end
     clear sensor data
-    save_file = [path, 'sensor_ss_no_interp','.mat'];
-    save(save_file,'sensor_ss')
-
+    if flag3
+        save_file = [path, 'sensor_ss_no_interp','.mat'];
+        save(save_file,'sensor_ss')
+    end
     %% Main lanes merged in one single measure per time interval
     disp('5) Joining main lanes... ')
     sensor_sum(length(sensors_id)) = struct(); %preallocate space for speed-up
     for i = 1:length(sensors_id)
         k = 1;
+
         ff= false;
-        for pp = 1:length(sensor_ss)
-            if (strcmp(sensors_id(i), sensor_ss(pp).id))
-                ff = true;
-                break
+        if flag3
+            for pp = 1:length(sensor_ss)
+                if (strcmp(sensors_id(i), sensor_ss(pp).id))
+                    ff = true;
+                    break
+                end
             end
         end
         if (ff)
@@ -175,6 +181,7 @@ try
         else
             n_lanes = sensor_main(i).n_lanes(1);
         end
+
         for j = 1:n_lanes:length(sensor_main(i).starting_s_time)
             total_veh=0;
             for z=j:(j+n_lanes-1)
