@@ -25,103 +25,131 @@ disp('-- CTMs parameters identification ')
 
 try
 
+    path=strcat(pwd,'\fnc\extracted_data\sensor_ss_no_interp.mat');
+    aa = load(path, '*');
+    sensors_ss = aa.sensor_ss;
+    clear aa;
     path=strcat(pwd,'\fnc\extracted_data\sensor_sum_no_interp.mat');
     aa = load(path, '*');
-    sensor_sum = aa.sensor_sum;
+    sensors_main = aa.sensor_sum;
     clear aa;
+
 
     %% Flows and beta estimation
     disp('1) Flows and beta estimation... ')
     id_sensor_input = opt.id_sensor_input;
     id_sensor_output = opt.id_sensor_output;
 
-    for i = 1:length(sensor_sum)
-        if(sensor_sum(i).id == id_sensor_output)
-            index_sensor_output=i;
+    % retrieve correct indexes
+    for i = 1:length(sensors_main)
+        if(sensors_main(i).id == id_sensor_output)
+            index_sensor_output_main=i;
         end
-        if(sensor_sum(i).id == id_sensor_input)
-            index_sensor_input=i;
+        if(sensors_main(i).id == id_sensor_input)
+            index_sensor_input_main=i;
+        end
+    end
+    for i = 1:length(sensors_ss)
+        if(sensors_ss(i).id == id_sensor_output)
+            index_sensor_output_ss=i;
+        end
+        if(sensors_ss(i).id == id_sensor_input)
+            index_sensor_input_ss=i;
         end
     end
 
-    flow_in=[];
-    flow_out=[];
-    parfor i=1: length(sensor_sum(1).vehicle_number)
-        flow_out = [flow_out (sensor_sum(index_sensor_output).vehicle_number(i) - sensor_sum(index_sensor_output-1).vehicle_number(i))];
-        flow_in = [flow_in (sensor_sum(index_sensor_input).vehicle_number(i) - sensor_sum(index_sensor_input+1).vehicle_number(i))];
+    if (opt.useSS)
+        flow_in_clean=sensors_ss(index_sensor_input_ss).vehicle_number;
+        flow_out_clean=sensors_ss(index_sensor_output_ss).vehicle_number;
+        x_flow = (linspace(0,24,length(flow_out_clean)))';
+        [f_in_poly,gof] = fit(x_flow,flow_in_clean','poly6','Robust', 'Bisquare');
+        RMSE_in_poly = gof.rmse
+        [f_in_fou,gof] = fit(x_flow,flow_in_clean','fourier6','Robust', 'Bisquare');
+        RMSE_in_fou = gof.rmse
+        [f_out_poly,gof] = fit(x_flow,flow_out_clean','poly6','Robust', 'Bisquare');
+        RMSE_out_poly = gof.rmse
+        [f_out_fou,gof] = fit(x_flow,flow_out_clean','fourier4','Robust', 'Bisquare');
+        RMSE_out_fou = gof.rmse
+        
+
+    else
+        flow_in=[];
+        flow_out=[];
+        parfor i=1: length(sensors_main(1).vehicle_number)
+            flow_out = [flow_out (sensors_main(index_sensor_output_main).vehicle_number(i) - sensors_main(index_sensor_output_main-1).vehicle_number(i))];
+            flow_in = [flow_in (sensors_main(index_sensor_input_main).vehicle_number(i) - sensors_main(index_sensor_input_main+1).vehicle_number(i))];
+        end
+        flow_in_clean = filloutliers(flow_in,"linear","percentiles",[25 99]);
+        flow_out_clean = filloutliers(flow_out,"pchip","percentiles",[10 85]);
+        x_flow = (linspace(0,24,length(flow_out_clean)))';
+        
+        [f_in_poly,gof] = fit(x_flow,flow_in_clean','poly6','Robust', 'Bisquare');
+        RMSE_in_poly = gof.rmse
+        [f_in_fou,gof] = fit(x_flow,flow_in_clean','fourier5','Robust', 'Bisquare');
+        RMSE_in_fou = gof.rmse
+        [f_out_poly,gof] = fit(x_flow,flow_out_clean','poly6','Robust', 'Bisquare');
+        RMSE_out_poly = gof.rmse
+        [f_out_fou,gof] = fit(x_flow,flow_out_clean','fourier5','Robust', 'Bisquare');
+        RMSE_out_fou = gof.rmse
+
     end
 
-    flow_in_clean = filloutliers(flow_in,"linear","percentiles",[25 99]);
-    flow_out_clean = filloutliers(flow_out,"pchip","percentiles",[10 85]);
-
-    x_flow = (linspace(0,24,length(flow_out_clean)))';
-    [f_in_poly,gof] = fit(x_flow,flow_in_clean','poly6','Robust', 'Bisquare');
-    RMSE_in_poly = gof.rmse
-    [f_in_fou,gof] = fit(x_flow,flow_in_clean','fourier5','Robust', 'Bisquare');
-    RMSE_in_fou = gof.rmse
-    [f_out_poly,gof] = fit(x_flow,flow_out_clean','poly6','Robust', 'Bisquare');
-    RMSE_out_poly = gof.rmse
-    [f_out_fou,gof] = fit(x_flow,flow_out_clean','fourier5','Robust', 'Bisquare');
-    RMSE_out_fou = gof.rmse
-
-
-
-% f1 = figure;
-%     scatter(x_flow,flow_in_clean',[],'filled')
-%     hold on
-%     grid on
-%     h = plot(f_in_poly);
-%     h.LineWidth = 3;
-%     h.Color = "black";
-%     h = plot(f_in_fou);
-%     h.LineWidth = 3;
-%     h.Color = "red";
-%     %ylim([0 1]);
-%     f1.WindowState = 'maximized';
-%     ax = gca();
-%     font_sz = 25;
-%     hLeg = legend();
-%     set(hLeg,'visible','off')
-%     ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
-%     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
-%     ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
-%     ax.XAxis.Label.Interpreter = 'latex';
-%     ax.YAxis.Label.String = '$Input flow$'; ax.YAxis.Label.FontSize = font_sz;
-%     ax.YAxis.Label.Interpreter = 'latex';
-%     exportgraphics(f1,['input_flow.pdf'],...
-%                    'BackgroundColor','none');
-%     exportgraphics(f1,['input_flow.eps'],...
-%                    'BackgroundColor','none');
-% 
-%     f2 = figure;
-%     scatter(x_flow,flow_out_clean',[],'filled')
-%     hold on
-%     grid on
-%     h = plot(f_out_poly);
-%     h.LineWidth = 3;
-%     h.Color = "black";
-%     h = plot(f_out_fou);
-%     h.LineWidth = 3;
-%     h.Color = "red";
-%     %ylim([0 1]);
-%     f2.WindowState = 'maximized';
-%     ax = gca();
-%     font_sz = 25;
-%     hLeg = legend();
-%     set(hLeg,'visible','off')
-%     ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
-%     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
-%     ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
-%     ax.XAxis.Label.Interpreter = 'latex';
-%     ax.YAxis.Label.String = '$Output flow$'; ax.YAxis.Label.FontSize = font_sz;
-%     ax.YAxis.Label.Interpreter = 'latex';
-%     exportgraphics(f2,'out_flow.pdf',...
-%                    'BackgroundColor','none');
-%     exportgraphics(f2,'out_flow.eps',...
-%                    'BackgroundColor','none');
+    % f1 = figure;
+    %     scatter(x_flow,flow_in_clean',[],'filled')
+    %     hold on
+    %     grid on
+    %     h = plot(f_in_poly);
+    %     h.LineWidth = 3;
+    %     h.Color = "black";
+    %     h = plot(f_in_fou);
+    %     h.LineWidth = 3;
+    %     h.Color = "red";
+    %     %ylim([0 1]);
+    %     f1.WindowState = 'maximized';
+    %     ax = gca();
+    %     font_sz = 25;
+    %     hLeg = legend();
+    %     set(hLeg,'visible','off')
+    %     ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
+    %     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
+    %     ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
+    %     ax.XAxis.Label.Interpreter = 'latex';
+    %     ax.YAxis.Label.String = '$Input flow$'; ax.YAxis.Label.FontSize = font_sz;
+    %     ax.YAxis.Label.Interpreter = 'latex';
+    %     exportgraphics(f1,['input_flow.pdf'],...
+    %                    'BackgroundColor','none');
+    %     exportgraphics(f1,['input_flow.eps'],...
+    %                    'BackgroundColor','none');
+    %
+    %     f2 = figure;
+    %     scatter(x_flow,flow_out_clean',[],'filled')
+    %     hold on
+    %     grid on
+    %     h = plot(f_out_poly);
+    %     h.LineWidth = 3;
+    %     h.Color = "black";
+    %     h = plot(f_out_fou);
+    %     h.LineWidth = 3;
+    %     h.Color = "red";
+    %     %ylim([0 1]);
+    %     f2.WindowState = 'maximized';
+    %     ax = gca();
+    %     font_sz = 25;
+    %     hLeg = legend();
+    %     set(hLeg,'visible','off')
+    %     ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
+    %     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
+    %     ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
+    %     ax.XAxis.Label.Interpreter = 'latex';
+    %     ax.YAxis.Label.String = '$Output flow$'; ax.YAxis.Label.FontSize = font_sz;
+    %     ax.YAxis.Label.Interpreter = 'latex';
+    %     exportgraphics(f2,'out_flow.pdf',...
+    %                    'BackgroundColor','none');
+    %     exportgraphics(f2,'out_flow.eps',...
+    %                    'BackgroundColor','none');
 
 
-    beta = flow_in./(sensor_sum(index_sensor_input).vehicle_number);
+    beta = flow_in_clean./(sensors_main(index_sensor_input_main).vehicle_number);
     parfor i=1:length(beta)
         if(isnan(beta(i)))
             beta(i)=-1;
@@ -134,59 +162,66 @@ try
     RMSE_beta = gof.rmse
     [f_beta_with_outliers,gof] = fit(x_beta',beta','poly2','Robust', 'Bisquare');
     RMSE_beta_outliers = gof.rmse
-    
-%     f1 = figure;
-%     scatter(x_beta',beta',[],'filled')
-%     hold on
-%     grid on
-%     %h = plot(f_beta);
-%     %h.LineWidth = 3;
-%     %ylim([0 1]);
-%     f1.WindowState = 'maximized';
-%     ax = gca();
-%     font_sz = 25;
-%     hLeg = legend();
-%     set(hLeg,'visible','off')
-%     ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
-%     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
-%     ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
-%     ax.XAxis.Label.Interpreter = 'latex';
-%     ax.YAxis.Label.String = '$\beta$'; ax.YAxis.Label.FontSize = font_sz;
-%     ax.YAxis.Label.Interpreter = 'latex';
-%     exportgraphics(f1,['beta.pdf'],...
-%                    'BackgroundColor','none');
-%     exportgraphics(f1,['beta.eps'],...
-%                    'BackgroundColor','none');
-% % 
-%     f2 = figure;
-%     scatter(x_beta',beta',[],'filled')
-%     hold on
-%     grid on
-%     h = plot(f_beta);
-%     h.LineWidth = 3;
-%     ylim([0 1]);
-%     f2.WindowState = 'maximized';
-%     ax = gca();
-%     font_sz = 25;
-%     hLeg = legend();
-%     set(hLeg,'visible','off')
-%     ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
-%     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
-%     ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
-%     ax.XAxis.Label.Interpreter = 'latex';
-%     ax.YAxis.Label.String = '$\beta$'; ax.YAxis.Label.FontSize = font_sz;
-%     ax.YAxis.Label.Interpreter = 'latex';
-%     exportgraphics(f2,['beta_detail.pdf'],...
-%                    'BackgroundColor','none');
-%     exportgraphics(f2,['beta_detail.eps'],...
-%                    'BackgroundColor','none');
+
+    figure(66666666)
+    scatter(x_beta, beta)
+    grid on
+    hold on
+    ylim([0 1])
+    plot(f_beta)
+
+    %     f1 = figure;
+    %     scatter(x_beta',beta',[],'filled')
+    %     hold on
+    %     grid on
+    %     %h = plot(f_beta);
+    %     %h.LineWidth = 3;
+    %     %ylim([0 1]);
+    %     f1.WindowState = 'maximized';
+    %     ax = gca();
+    %     font_sz = 25;
+    %     hLeg = legend();
+    %     set(hLeg,'visible','off')
+    %     ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
+    %     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
+    %     ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
+    %     ax.XAxis.Label.Interpreter = 'latex';
+    %     ax.YAxis.Label.String = '$\beta$'; ax.YAxis.Label.FontSize = font_sz;
+    %     ax.YAxis.Label.Interpreter = 'latex';
+    %     exportgraphics(f1,['beta.pdf'],...
+    %                    'BackgroundColor','none');
+    %     exportgraphics(f1,['beta.eps'],...
+    %                    'BackgroundColor','none');
+    % %
+    %     f2 = figure;
+    %     scatter(x_beta',beta',[],'filled')
+    %     hold on
+    %     grid on
+    %     h = plot(f_beta);
+    %     h.LineWidth = 3;
+    %     ylim([0 1]);
+    %     f2.WindowState = 'maximized';
+    %     ax = gca();
+    %     font_sz = 25;
+    %     hLeg = legend();
+    %     set(hLeg,'visible','off')
+    %     ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
+    %     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
+    %     ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
+    %     ax.XAxis.Label.Interpreter = 'latex';
+    %     ax.YAxis.Label.String = '$\beta$'; ax.YAxis.Label.FontSize = font_sz;
+    %     ax.YAxis.Label.Interpreter = 'latex';
+    %     exportgraphics(f2,['beta_detail.pdf'],...
+    %                    'BackgroundColor','none');
+    %     exportgraphics(f2,['beta_detail.eps'],...
+    %                    'BackgroundColor','none');
 
 
 
 
 
 
-    %% Station occupancy estimation
+%     %% Station occupancy estimation
     disp('2) Occupancy estimation... ')
     y_f_out_fou=f_out_fou(x_flow);
     y_f_in_fou=f_in_fou(x_flow);
@@ -358,27 +393,27 @@ try
         fprintf("\t - y = %d done\n", k)
     end
 
-    % computations for plot - fourier
-    delay_fou_plot = [];
-    parfor i=1:length(plot_tmp)
-        if(plot_tmp(i,1)*plot_tmp(i,2)>0)
-            row = [plot_tmp(i,2) plot_tmp(i,1)];
-            delay_fou_plot = [delay_fou_plot; row];
+%     computations for plot - fourier
+        delay_fou_plot = [];
+        parfor i=1:length(plot_tmp)
+            if(plot_tmp(i,1)*plot_tmp(i,2)>0)
+                row = [plot_tmp(i,2) plot_tmp(i,1)];
+                delay_fou_plot = [delay_fou_plot; row];
+            end
         end
-    end
-    [delay_fou_plot(:,1), I] = sort(delay_fou_plot(:,1));
-    delay_fou_plot(:,2) = delay_fou_plot(I,2);
-
-    % computations for plot - poly
-    delay_poly_plot = [];
-    parfor i=1:length(plot_tmp2)
-        if(plot_tmp2(i,1)*plot_tmp2(i,2)>0)
-            row = [plot_tmp2(i,2) plot_tmp2(i,1)];
-            delay_poly_plot = [delay_poly_plot; row];
+        [delay_fou_plot(:,1), I] = sort(delay_fou_plot(:,1));
+        delay_fou_plot(:,2) = delay_fou_plot(I,2);
+    
+        % computations for plot - poly
+        delay_poly_plot = [];
+        parfor i=1:length(plot_tmp2)
+            if(plot_tmp2(i,1)*plot_tmp2(i,2)>0)
+                row = [plot_tmp2(i,2) plot_tmp2(i,1)];
+                delay_poly_plot = [delay_poly_plot; row];
+            end
         end
-    end
-    [delay_poly_plot(:,1), I] = sort(delay_poly_plot(:,1));
-    delay_poly_plot(:,2) = delay_poly_plot(I,2);
+        [delay_poly_plot(:,1), I] = sort(delay_poly_plot(:,1));
+        delay_poly_plot(:,2) = delay_poly_plot(I,2);
 
     %% Build output stucture
     station_params.beta_avg = mean(f_beta(x_beta));
@@ -389,52 +424,52 @@ try
 
 
 
-%     f1 = figure;
-%     h = plot(x_flow,tot_cars_poly);
-% %     scatter(delay_poly_plot(:,1), delay_poly_plot(:,2),[],'filled')
-% %     hold on
-%     grid on
-% %     h = plot(fit(delay_poly_plot(:,1),delay_poly_plot(:,2),'poly1','Normalize','on','Robust','Bisquare'));
-%     h.LineWidth = 3;
-%     f1.WindowState = 'maximized';
-%     ax = gca();
-%     font_sz = 25;
-%     hLeg = legend();
-%     set(hLeg,'visible','off')
-%     ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
-%     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
-%     ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
-%     ax.XAxis.Label.Interpreter = 'latex';
-%     ax.YAxis.Label.String = '$\ell [min]$'; ax.YAxis.Label.FontSize = font_sz;
-%     ax.YAxis.Label.Interpreter = 'latex';
-%     exportgraphics(f1,'Occupancy_Poly.pdf',...
-%                    'BackgroundColor','none');
-%     exportgraphics(f1,'Occupancy_Poly.eps',...
-%                    'BackgroundColor','none');
-% % 
-%     f2 = figure;
-%         h = plot(x_flow,tot_cars_fou);
-% %     scatter(delay_fou_plot(:,1), delay_fou_plot(:,2),[],'filled')
-% %     hold on
-% %     grid on
-% %     h = plot(fit(delay_fou_plot(:,1),delay_fou_plot(:,2),'poly1','Normalize','on','Robust','Bisquare'));
-% grid on
-%     h.LineWidth = 3;
-%     f2.WindowState = 'maximized';
-%     ax = gca();
-%     font_sz = 25;
-%     hLeg = legend();
-%     set(hLeg,'visible','off')
-%     ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
-%     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
-%     ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
-%     ax.XAxis.Label.Interpreter = 'latex';
-%     ax.YAxis.Label.String = '$\ell [min]$'; ax.YAxis.Label.FontSize = font_sz;
-%     ax.YAxis.Label.Interpreter = 'latex';
-%     exportgraphics(f2,'Occupancy_Fourier.pdf',...
-%                    'BackgroundColor','none');
-%     exportgraphics(f2,'Occupancy_Fourier.eps',...
-%                    'BackgroundColor','none');
+    %     f1 = figure;
+    %     h = plot(x_flow,tot_cars_poly);
+    % %     scatter(delay_poly_plot(:,1), delay_poly_plot(:,2),[],'filled')
+    % %     hold on
+    %     grid on
+    % %     h = plot(fit(delay_poly_plot(:,1),delay_poly_plot(:,2),'poly1','Normalize','on','Robust','Bisquare'));
+    %     h.LineWidth = 3;
+    %     f1.WindowState = 'maximized';
+    %     ax = gca();
+    %     font_sz = 25;
+    %     hLeg = legend();
+    %     set(hLeg,'visible','off')
+    %     ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
+    %     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
+    %     ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
+    %     ax.XAxis.Label.Interpreter = 'latex';
+    %     ax.YAxis.Label.String = '$\ell [min]$'; ax.YAxis.Label.FontSize = font_sz;
+    %     ax.YAxis.Label.Interpreter = 'latex';
+    %     exportgraphics(f1,'Occupancy_Poly.pdf',...
+    %                    'BackgroundColor','none');
+    %     exportgraphics(f1,'Occupancy_Poly.eps',...
+    %                    'BackgroundColor','none');
+    % %
+    %     f2 = figure;
+    %         h = plot(x_flow,tot_cars_fou);
+    % %     scatter(delay_fou_plot(:,1), delay_fou_plot(:,2),[],'filled')
+    % %     hold on
+    % %     grid on
+    % %     h = plot(fit(delay_fou_plot(:,1),delay_fou_plot(:,2),'poly1','Normalize','on','Robust','Bisquare'));
+    % grid on
+    %     h.LineWidth = 3;
+    %     f2.WindowState = 'maximized';
+    %     ax = gca();
+    %     font_sz = 25;
+    %     hLeg = legend();
+    %     set(hLeg,'visible','off')
+    %     ax.XAxis.FontSize = font_sz; ax.XAxis.TickLabelInterpreter = 'latex';
+    %     ax.YAxis.FontSize = font_sz; ax.YAxis.TickLabelInterpreter = 'latex';
+    %     ax.XAxis.Label.String = '$Time [h]$'; ax.XAxis.Label.FontSize = font_sz;
+    %     ax.XAxis.Label.Interpreter = 'latex';
+    %     ax.YAxis.Label.String = '$\ell [min]$'; ax.YAxis.Label.FontSize = font_sz;
+    %     ax.YAxis.Label.Interpreter = 'latex';
+    %     exportgraphics(f2,'Occupancy_Fourier.pdf',...
+    %                    'BackgroundColor','none');
+    %     exportgraphics(f2,'Occupancy_Fourier.eps',...
+    %                    'BackgroundColor','none');
 
     %% Plots
     if(opt.display>0)
@@ -576,50 +611,50 @@ try
         grid on
         xlabel("hour")
         title('beta');
-        Fs = 0.1;            % Sampling frequency                    
+        Fs = 0.1;            % Sampling frequency
 
         %%%%%%%%%%%%%%%%
         L = length (flow_in);
-Y = fft(flow_in);
-P2 = abs(Y/L);
-P1 = P2(1:L/2+1);
-P1(2:end-1) = 2*P1(2:end-1);
-f = Fs*(0:(L/2))/L;
+        Y = fft(flow_in);
+        P2 = abs(Y/L);
+        P1 = P2(1:L/2+1);
+        P1(2:end-1) = 2*P1(2:end-1);
+        f = Fs*(0:(L/2))/L;
 
-figure(last_fig_num+12)
-plot(f,P1, "-o") 
-grid on
-title("Single-Sided Amplitude Spectrum of Flow in")
-xlabel("f (Hz)")
-ylabel("|P1(f)|")
+        figure(last_fig_num+12)
+        plot(f,P1, "-o")
+        grid on
+        title("Single-Sided Amplitude Spectrum of Flow in")
+        xlabel("f (Hz)")
+        ylabel("|P1(f)|")
 
-Fs = 0.1;            % Sampling frequency                    
-L = length (flow_out);
-Y = fft(flow_out);
-P2 = abs(Y/L);
-P1 = P2(1:L/2+1);
-P1(2:end-1) = 2*P1(2:end-1);
+        Fs = 0.1;            % Sampling frequency
+        L = length (flow_out);
+        Y = fft(flow_out);
+        P2 = abs(Y/L);
+        P1 = P2(1:L/2+1);
+        P1(2:end-1) = 2*P1(2:end-1);
 
-figure(last_fig_num+13)
-plot(f,P1, "-o") 
-grid on
-title("Single-Sided Amplitude Spectrum of Flow out")
-xlabel("f (Hz)")
-ylabel("|P1(f)|")
+        figure(last_fig_num+13)
+        plot(f,P1, "-o")
+        grid on
+        title("Single-Sided Amplitude Spectrum of Flow out")
+        xlabel("f (Hz)")
+        ylabel("|P1(f)|")
 
-Fs = 0.1;            % Sampling frequency                    
-L = length (beta);
-Y = fft(beta);
-P2 = abs(Y/L);
-P1 = P2(1:L/2+1);
-P1(2:end-1) = 2*P1(2:end-1);
+        Fs = 0.1;            % Sampling frequency
+        L = length (beta);
+        Y = fft(beta);
+        P2 = abs(Y/L);
+        P1 = P2(1:L/2+1);
+        P1(2:end-1) = 2*P1(2:end-1);
 
-figure(last_fig_num+14)
-plot(f,P1, "-o") 
-grid on
-title("Single-Sided Amplitude Spectrum of Beta")
-xlabel("f (Hz)")
-ylabel("|P1(f)|")
+        figure(last_fig_num+14)
+        plot(f,P1, "-o")
+        grid on
+        title("Single-Sided Amplitude Spectrum of Beta")
+        xlabel("f (Hz)")
+         ylabel("|P1(f)|")
     end
 catch ME
     keyboard
